@@ -100,12 +100,12 @@ app.get("/users", async (req, res) => {
 app.post("/users", async (req, res) => {
   console.log("Hit POST /users");
   try {
-    const { name, email, phone } = req.body;
+    const { name, email, phone,password } = req.body;
 
-    if (!name || !email || !phone) {
+    if (!name || !email || !phone || !password) {
       return res
         .status(400)
-        .json({ error: "name, email and phone are required" });
+        .json({ error: "name, email, phone and password are required" });
     }
 
     const user = await prisma.user.create({
@@ -113,6 +113,7 @@ app.post("/users", async (req, res) => {
         name,
         email,
         phone,
+        password
       },
     });
     return res.status(201).json(user);
