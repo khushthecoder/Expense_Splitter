@@ -1,34 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 model User {
   user_id             Int            @id @default(autoincrement())
   name                String
   email               String         @unique
-  phone               String?
+  phone               String         @unique
   created_at          DateTime       @default(now())
-  groups              Group[]        @relation("GroupMembers")
   expenses            Expense[]      @relation("PaidBy")
   splits              ExpenseSplit[]
+  groups              GroupMember[]
   settlementsPaid     Settlement[]   @relation("SettlementsPaid")
   settlementsReceived Settlement[]   @relation("SettlementsReceived")
+  password             String 
 }
 
 model Group {
-  group_id    Int          @id @default(autoincrement())
+  group_id    Int           @id @default(autoincrement())
   name        String
   description String?
-  created_by  Int?
-  created_at  DateTime     @default(now())
-  members     User[]       @relation("GroupMembers")
+  created_by  Int
+  created_at  DateTime      @default(now())
   expenses    Expense[]
+  members     GroupMember[]
   settlements Settlement[]
+}
+
+model GroupMember {
+  id        Int      @id @default(autoincrement())
+  group_id  Int
+  user_id   Int
+  joined_at DateTime @default(now())
+  group     Group    @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
+  user      User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([group_id], map: "GroupMember_group_id_fkey")
+  @@index([user_id], map: "GroupMember_user_id_fkey")
 }
 
 model Expense {
@@ -41,6 +54,9 @@ model Expense {
   group       Group?         @relation(fields: [group_id], references: [group_id])
   payer       User?          @relation("PaidBy", fields: [paid_by], references: [user_id])
   splits      ExpenseSplit[]
+
+  @@index([group_id], map: "Expense_group_id_fkey")
+  @@index([paid_by], map: "Expense_paid_by_fkey")
 }
 
 model ExpenseSplit {
@@ -50,6 +66,9 @@ model ExpenseSplit {
   share      Decimal @db.Decimal(10, 2)
   expense    Expense @relation(fields: [expense_id], references: [expense_id])
   user       User    @relation(fields: [user_id], references: [user_id])
+
+  @@index([expense_id], map: "ExpenseSplit_expense_id_fkey")
+  @@index([user_id], map: "ExpenseSplit_user_id_fkey")
 }
 
 model Settlement {
@@ -62,4 +81,9 @@ model Settlement {
   group         Group?   @relation(fields: [group_id], references: [group_id])
   payer         User?    @relation("SettlementsPaid", fields: [paid_by], references: [user_id])
   receiver      User?    @relation("SettlementsReceived", fields: [paid_to], references: [user_id])
+
+  @@index([group_id], map: "Settlement_group_id_fkey")
+  @@index([paid_by], map: "Settlement_paid_by_fkey")
+  @@index([paid_to], map: "Settlement_paid_to_fkey")
 }
+
