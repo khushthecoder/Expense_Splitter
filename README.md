@@ -17,8 +17,6 @@ Purpose: Make it easy for groups to share expenses and settle up with a clear re
 
 ## Setup & Run (local)
 
-All commands assume your shell is zsh (adjust if using another shell).
-
 1. Backend
 
 ```bash
