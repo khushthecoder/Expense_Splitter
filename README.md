@@ -69,7 +69,7 @@ Provide an app where users create groups, add expenses, split amounts (equally o
 
 ### Team members & roles
 
-1. Advik Khandelwal --> (backend)
+1. Advik Khandelwal --> (backend + database)
 2. Harsh Ahlawat --> (backend+frontend)
 3. Patel Parthkumar --> (backend+frontend)
 4. Khush Kanubhai Chaudhari --> (backend+frontend)
