@@ -86,4 +86,3 @@ model Settlement {
   @@index([paid_by], map: "Settlement_paid_by_fkey")
   @@index([paid_to], map: "Settlement_paid_to_fkey")
 }
-
