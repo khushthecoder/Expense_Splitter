@@ -78,4 +78,11 @@ Provide an app where users create groups, add expenses, split amounts (equally o
 
 <img width="894" height="826" alt="Expence" src="https://github.com/user-attachments/assets/d2e8a96d-fd7b-4d26-8365-304e40a58b03" />
 
+
+
+
+# Contributors
+[![GitHub contributors](https://img.shields.io/github/contributors/Advikkhandelwal/Expense_Splitter)](https://github.com/Advikkhandelwal/Expense_Splitter/graphs/contributors)
+
+[![Contributors](https://contrib.rocks/image?repo=Advikkhandelwal/Expense_Splitter)](https://github.com/Advikkhandelwal/Expense_Splitter/graphs/contributors)
 ---
