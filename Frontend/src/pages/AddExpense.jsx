@@ -124,6 +124,29 @@ export default function AddExpense() {
     e.preventDefault();
     if (!description || !amount || !paidBy) return;
 
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      alert('Please enter a valid amount greater than 0');
+      return;
+    }
+
+    // Validate splits
+    if (splitType === 'percentage') {
+      const totalPercentage = Object.values(percentages).reduce((sum, p) => sum + (parseFloat(p) || 0), 0);
+      if (Math.abs(totalPercentage - 100) > 0.1) {
+        alert(`Total percentage must be 100%. Current total: ${totalPercentage.toFixed(2)}%`);
+        return;
+      }
+    }
+
+    if (splitType === 'unequal') {
+      const totalSplit = Object.values(splits).reduce((sum, s) => sum + (parseFloat(s) || 0), 0);
+      if (Math.abs(totalSplit - numAmount) > 0.01) {
+        alert(`Total split amount ($${totalSplit.toFixed(2)}) must equal the expense amount ($${numAmount.toFixed(2)})`);
+        return;
+      }
+    }
+
     try {
       await addExpense({
         group_id: id ? parseInt(id) : null,
@@ -208,8 +231,8 @@ export default function AddExpense() {
                   type="button"
                   onClick={() => setSplitType(type)}
                   className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all capitalize ${splitType === type
-                      ? 'bg-white text-primary shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-white text-primary shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
                     }`}
                 >
                   {type}

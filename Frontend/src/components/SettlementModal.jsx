@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 
 export default function SettlementModal({ isOpen, onClose, group }) {
-  const { addExpense, balances } = useStore();
+  const { recordSettlement, balances } = useStore();
   const [payer, setPayer] = useState('');
   const [receiver, setReceiver] = useState('');
   const [amount, setAmount] = useState('');
@@ -10,11 +10,11 @@ export default function SettlementModal({ isOpen, onClose, group }) {
   // Calculate debts to suggest settlements
   const debts = [];
   const members = group?.members || [];
-  
+
   // Simple algorithm to find who owes whom (simplified for UI suggestions)
   // In a real app, this would be more complex graph simplification
   const memberBalances = { ...balances };
-  
+
   // Filter balances for current group members only to avoid confusion if global balances exist
   // (Assuming balances in store are for current group)
 
@@ -29,6 +29,10 @@ export default function SettlementModal({ isOpen, onClose, group }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!payer || !receiver || !amount) return;
+
+    if (!window.confirm(`Are you sure you want to record a payment of $${amount}?`)) {
+      return;
+    }
 
     await recordSettlement({
       group_id: group.group_id,
@@ -52,8 +56,8 @@ export default function SettlementModal({ isOpen, onClose, group }) {
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Settle Up</h2>
           </div>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
           >
             ✕
@@ -113,15 +117,15 @@ export default function SettlementModal({ isOpen, onClose, group }) {
           </div>
 
           <div className="pt-4 flex gap-3">
-            <button 
-              type="button" 
-              onClick={onClose} 
+            <button
+              type="button"
+              onClick={onClose}
               className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 font-semibold hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="flex-1 px-4 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-200 transition-all transform hover:-translate-y-0.5"
             >
               Record Payment

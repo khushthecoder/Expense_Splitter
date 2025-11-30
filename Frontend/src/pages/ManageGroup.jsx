@@ -5,7 +5,7 @@ import { useStore } from '../store/useStore';
 export default function ManageGroup() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentGroup, inviteMember, removeMember } = useStore();
+  const { currentGroup, inviteMember, removeMember, balances } = useStore();
   const [newMemberEmail, setNewMemberEmail] = useState('');
 
   if (!currentGroup) {
@@ -25,7 +25,13 @@ export default function ManageGroup() {
   };
 
   const handleRemoveMember = (userId) => {
-    if (window.confirm('Are you sure you want to remove this member?')) {
+    const memberBalance = balances[userId] || 0;
+    if (Math.abs(memberBalance) > 0.01) {
+      alert(`Cannot remove member. They have an outstanding balance of $${memberBalance.toFixed(2)}. Please settle up first.`);
+      return;
+    }
+
+    if (window.confirm('Are you sure you want to remove this member? This action cannot be undone.')) {
       removeMember(userId);
     }
   };

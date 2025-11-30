@@ -31,7 +31,31 @@ export default function GroupDetail() {
   }, [id]);
 
   if (loading || !currentGroup) {
-    return <div className="flex items-center justify-center h-64">Loading...</div>;
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <div className="h-8 w-48 bg-gray-200 rounded"></div>
+            <div className="h-4 w-64 bg-gray-200 rounded"></div>
+          </div>
+          <div className="flex gap-3">
+            <div className="h-10 w-24 bg-gray-200 rounded"></div>
+            <div className="h-10 w-32 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
+          ))}
+        </div>
+        <div className="h-10 w-full bg-gray-200 rounded"></div>
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-24 bg-gray-200 rounded-xl"></div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   const totalSpent = expenses
@@ -89,8 +113,8 @@ export default function GroupDetail() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 pb-4 px-2 font-medium transition-colors relative ${activeTab === tab.id
-                  ? 'text-primary'
-                  : 'text-gray-500 hover:text-gray-700'
+                ? 'text-primary'
+                : 'text-gray-500 hover:text-gray-700'
                 }`}
             >
               <tab.icon size={18} />
