@@ -9,6 +9,7 @@ import AddExpense from './pages/AddExpense';
 import ManageGroup from './pages/ManageGroup';
 import Friends from './pages/Friends';
 import Settings from './pages/Settings';
+import Groups from './pages/Groups';
 import './index.css';
 
 function ProtectedRoute({ children }) {
@@ -33,7 +34,7 @@ function App() {
           path="/groups"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <Groups />
             </ProtectedRoute>
           }
         />
