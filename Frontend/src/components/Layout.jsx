@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { cn } from './ui';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Settings, 
-  LogOut, 
-  Menu, 
+import {
+  LayoutDashboard,
+  Users,
+  Settings,
+  LogOut,
+  Menu,
   X,
   Bell,
   ChevronDown
@@ -28,6 +28,7 @@ export default function Layout({ children }) {
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Users, label: 'My Groups', path: '/groups' },
+    { icon: Users, label: 'My Friends', path: '/friends' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
@@ -51,8 +52,8 @@ export default function Layout({ children }) {
               to={item.path}
               className={({ isActive }) => cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium",
-                isActive 
-                  ? "bg-primary-light/50 text-primary" 
+                isActive
+                  ? "bg-primary-light/50 text-primary"
                   : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
               )}
             >
@@ -63,7 +64,7 @@ export default function Layout({ children }) {
         </nav>
 
         <div className="p-4 border-t border-gray-50">
-          <button 
+          <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 transition-all duration-200 font-medium"
           >
@@ -75,7 +76,7 @@ export default function Layout({ children }) {
 
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
         />
@@ -100,8 +101,8 @@ export default function Layout({ children }) {
               onClick={() => setIsMobileMenuOpen(false)}
               className={({ isActive }) => cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium",
-                isActive 
-                  ? "bg-primary-light/50 text-primary" 
+                isActive
+                  ? "bg-primary-light/50 text-primary"
                   : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
               )}
             >
@@ -109,7 +110,7 @@ export default function Layout({ children }) {
               {item.label}
             </NavLink>
           ))}
-          <button 
+          <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 transition-all duration-200 font-medium mt-4"
           >
@@ -124,7 +125,7 @@ export default function Layout({ children }) {
         {/* Top Navbar */}
         <header className="bg-white/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100 px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setIsMobileMenuOpen(true)}
               className="md:hidden p-2 text-gray-500 hover:bg-gray-50 rounded-lg"
             >
@@ -148,7 +149,7 @@ export default function Layout({ children }) {
 
             {/* User Profile */}
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center gap-3 hover:bg-gray-50 p-2 rounded-xl transition-colors"
               >

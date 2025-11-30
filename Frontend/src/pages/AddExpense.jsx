@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { Card, Button, Input } from '../components/ui';
 import { ArrowLeft, DollarSign, Users } from 'lucide-react';
+import { friendService } from '../services/api';
 
 export default function AddExpense() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const friendId = searchParams.get('friend_id');
   const navigate = useNavigate();
-  const { currentGroup, fetchGroup, addExpense, loading } = useStore();
-  
+  const { currentGroup, fetchGroup, addExpense, loading, user } = useStore();
+
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [paidBy, setPaidBy] = useState('');
@@ -16,40 +19,71 @@ export default function AddExpense() {
   const [splits, setSplits] = useState({});
   const [shares, setShares] = useState({});
   const [percentages, setPercentages] = useState({});
+  const [members, setMembers] = useState([]);
 
   useEffect(() => {
-    if (!currentGroup || currentGroup.group_id !== parseInt(id)) {
-      fetchGroup(id);
+    const loadData = async () => {
+      if (id) {
+        if (!currentGroup || currentGroup.group_id !== parseInt(id)) {
+          await fetchGroup(id);
+        }
+      } else if (friendId) {
+        // Load friend details
+        try {
+          const res = await friendService.getAll(user.user_id);
+          const friend = res.data.find(f =>
+            (f.user_id === user.user_id && f.friend_id === parseInt(friendId)) ||
+            (f.friend_id === user.user_id && f.user_id === parseInt(friendId))
+          );
+
+          if (friend) {
+            const friendUser = friend.user_id === user.user_id ? friend.friend : friend.user;
+            setMembers([
+              { user_id: user.user_id, name: 'You' },
+              { user_id: friendUser.user_id, name: friendUser.name }
+            ]);
+          }
+        } catch (err) {
+          console.error("Failed to load friend", err);
+        }
+      }
+    };
+    loadData();
+  }, [id, friendId, user]);
+
+  useEffect(() => {
+    if (currentGroup && id) {
+      setMembers(currentGroup.members);
     }
-  }, [id, currentGroup, fetchGroup]);
+  }, [currentGroup, id]);
 
   useEffect(() => {
-    if (currentGroup && currentGroup.members.length > 0 && !paidBy) {
-      setPaidBy(currentGroup.members[0].user_id);
-      
+    if (members.length > 0 && !paidBy) {
+      setPaidBy(user.user_id);
+
       // Initialize splits
       const initialSplits = {};
       const initialShares = {};
       const initialPercentages = {};
-      
-      currentGroup.members.forEach(member => {
+
+      members.forEach(member => {
         initialSplits[member.user_id] = 0;
         initialShares[member.user_id] = 1;
-        initialPercentages[member.user_id] = (100 / currentGroup.members.length).toFixed(2);
+        initialPercentages[member.user_id] = (100 / members.length).toFixed(2);
       });
-      
+
       setSplits(initialSplits);
       setShares(initialShares);
       setPercentages(initialPercentages);
     }
-  }, [currentGroup, paidBy]);
+  }, [members, paidBy, user]);
 
   const handleAmountChange = (val) => {
     setAmount(val);
-    if (splitType === 'equal' && val && currentGroup) {
-      const splitAmount = parseFloat(val) / currentGroup.members.length;
+    if (splitType === 'equal' && val && members.length > 0) {
+      const splitAmount = parseFloat(val) / members.length;
       const newSplits = {};
-      currentGroup.members.forEach(m => {
+      members.forEach(m => {
         newSplits[m.user_id] = splitAmount;
       });
       setSplits(newSplits);
@@ -62,12 +96,12 @@ export default function AddExpense() {
     } else if (type === 'share') {
       const newShares = { ...shares, [userId]: parseFloat(value) || 0 };
       setShares(newShares);
-      
+
       // Recalculate splits based on shares
       const totalShares = Object.values(newShares).reduce((a, b) => a + b, 0);
       const totalAmount = parseFloat(amount) || 0;
       const newSplits = {};
-      
+
       Object.entries(newShares).forEach(([uid, share]) => {
         newSplits[uid] = (share / totalShares) * totalAmount;
       });
@@ -75,10 +109,10 @@ export default function AddExpense() {
     } else if (type === 'percentage') {
       const newPercentages = { ...percentages, [userId]: parseFloat(value) || 0 };
       setPercentages(newPercentages);
-      
+
       const totalAmount = parseFloat(amount) || 0;
       const newSplits = {};
-      
+
       Object.entries(newPercentages).forEach(([uid, pct]) => {
         newSplits[uid] = (pct / 100) * totalAmount;
       });
@@ -92,34 +126,38 @@ export default function AddExpense() {
 
     try {
       await addExpense({
-        group_id: parseInt(id),
+        group_id: id ? parseInt(id) : null,
         description,
         amount: parseFloat(amount),
         paid_by: parseInt(paidBy),
         split: splits
       });
-      navigate(`/groups/${id}`);
+      if (id) {
+        navigate(`/groups/${id}`);
+      } else {
+        navigate('/friends');
+      }
     } catch (error) {
       console.error(error);
     }
   };
 
-  if (!currentGroup) return <div className="flex justify-center p-8">Loading...</div>;
+  if (!members.length) return <div className="flex justify-center p-8">Loading...</div>;
 
   return (
     <div className="max-w-2xl mx-auto">
-      <Button 
-        variant="ghost" 
+      <Button
+        variant="ghost"
         className="mb-6 pl-0 hover:bg-transparent hover:text-primary"
-        onClick={() => navigate(`/groups/${id}`)}
+        onClick={() => id ? navigate(`/groups/${id}`) : navigate('/friends')}
       >
         <ArrowLeft size={20} className="mr-2" />
-        Back to Group
+        Back to {id ? 'Group' : 'Friends'}
       </Button>
 
       <Card className="p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Add New Expense</h1>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <Input
             label="Description"
@@ -153,7 +191,7 @@ export default function AddExpense() {
               value={paidBy}
               onChange={(e) => setPaidBy(e.target.value)}
             >
-              {currentGroup.members.map(member => (
+              {members.map(member => (
                 <option key={member.user_id} value={member.user_id}>
                   {member.name}
                 </option>
@@ -169,11 +207,10 @@ export default function AddExpense() {
                   key={type}
                   type="button"
                   onClick={() => setSplitType(type)}
-                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all capitalize ${
-                    splitType === type 
-                      ? 'bg-white text-primary shadow-sm' 
+                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all capitalize ${splitType === type
+                      ? 'bg-white text-primary shadow-sm'
                       : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                    }`}
                 >
                   {type}
                 </button>
@@ -181,13 +218,13 @@ export default function AddExpense() {
             </div>
 
             <div className="space-y-3 bg-gray-50 p-4 rounded-xl">
-              {currentGroup.members.map(member => (
+              {members.map(member => (
                 <div key={member.user_id} className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sm font-bold text-gray-600 border border-gray-200">
                     {member.name.charAt(0).toUpperCase()}
                   </div>
                   <span className="flex-1 text-sm font-medium text-gray-700">{member.name}</span>
-                  
+
                   {splitType === 'equal' && (
                     <span className="text-gray-500 font-medium">
                       ${(splits[member.user_id] || 0).toFixed(2)}

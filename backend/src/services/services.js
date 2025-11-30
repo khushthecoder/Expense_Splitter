@@ -16,8 +16,43 @@ const Service = {
     prisma.user.findUnique({
       where: { user_id: id }
     }),
+  getUserById: (id) =>
+    prisma.user.findUnique({
+      where: { user_id: id }
+    }),
 
-//GROUPS
+  // FRIENDS
+  getFriends: (user_id) =>
+    prisma.friend.findMany({
+      where: {
+        OR: [{ user_id }, { friend_id: user_id }],
+        status: "accepted"
+      },
+      include: {
+        user: { select: { user_id: true, name: true, email: true } },
+        friend: { select: { user_id: true, name: true, email: true } }
+      }
+    }),
+
+  addFriend: (user_id, friend_id) =>
+    prisma.friend.create({
+      data: {
+        user_id,
+        friend_id,
+        status: "accepted"
+      }
+    }),
+
+  removeFriend: (user_id, friend_id) =>
+    prisma.friend.deleteMany({
+      where: {
+        OR: [
+          { user_id, friend_id },
+          { user_id: friend_id, friend_id: user_id }
+        ]
+      }
+    }),
+  //GROUPS
   getAllGroups: () =>
     prisma.group.findMany({ orderBy: { created_at: "desc" } }),
 
@@ -43,7 +78,7 @@ const Service = {
   createGroup: (data) => prisma.group.create({ data }),
 
   findGroup: (id) =>
-    prisma.group.findUnique({ 
+    prisma.group.findUnique({
       where: { group_id: id },
       include: {
         members: {
@@ -75,7 +110,7 @@ const Service = {
     });
   },
 
-// EXPENSES 
+  // EXPENSES 
   createExpense: (data) =>
     prisma.expense.create({
       data,
@@ -116,12 +151,32 @@ const Service = {
       orderBy: { created_at: "desc" }
     }),
 
+  getExpensesByUser: (user_id) =>
+    prisma.expense.findMany({
+      where: {
+        OR: [
+          { paid_by: user_id },
+          { splits: { some: { user_id } } }
+        ],
+        group_id: null
+      },
+      include: {
+        payer: { select: { user_id: true, name: true, email: true } },
+        splits: {
+          include: {
+            user: { select: { user_id: true, name: true, email: true } }
+          }
+        }
+      },
+      orderBy: { created_at: "desc" }
+    }),
+
   deleteExpense: (id) =>
     prisma.expense.delete({
       where: { expense_id: id }
     }),
 
-//SETTLEMENTS
+  //SETTLEMENTS
   createSettlement: (data) =>
     prisma.settlement.create({ data }),
 

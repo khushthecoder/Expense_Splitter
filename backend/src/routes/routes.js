@@ -19,6 +19,9 @@ import {
   createSettlement,
   userSettlements,
   groupSettlements,
+  getFriends,
+  addFriend,
+  removeFriend,
 } from "../controllers/controller.js";
 
 const router = Router();
@@ -29,6 +32,11 @@ router.post("/signup", signup);
 router.get("/users", getUsers);
 router.get("/users/:id", getUser);
 router.get("/users/:id/activity", userActivity);
+
+// FRIENDS
+router.get("/friends", getFriends);
+router.post("/friends", addFriend);
+router.delete("/friends/:id", removeFriend);
 
 // GROUPS
 router.get("/groups", getGroups);
