@@ -24,6 +24,11 @@ export default function AddExpense() {
   useEffect(() => {
     const loadData = async () => {
       if (id) {
+        if (id === 'null' || isNaN(parseInt(id))) {
+          alert("Invalid group ID. Please select a valid group.");
+          navigate('/dashboard');
+          return;
+        }
         if (!currentGroup || currentGroup.group_id !== parseInt(id)) {
           await fetchGroup(id);
         }
