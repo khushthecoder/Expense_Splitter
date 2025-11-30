@@ -6,6 +6,7 @@ import {
   getUser,
   userActivity,
   getGroups,
+  getGroupById,
   createGroup,
   addMember,
   removeMember,
@@ -50,6 +51,7 @@ router.delete("/friends/:id", removeFriend);
 
 // GROUPS
 router.get("/groups", getGroups);
+router.get("/groups/:id", getGroupById);
 router.post("/groups", createGroup);
 router.post("/groups/:id/members", addMember);
 router.delete("/groups/:id/members/:userId", removeMember);

@@ -222,6 +222,38 @@ export const getGroups = async (req, res) => {
   }
 };
 
+// Get single group by id (includes members)
+export const getGroupById = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ error: "Invalid group id" });
+    }
+
+    const group = await Service.findGroup(id);
+    if (!group) {
+      return res.status(404).json({ error: "Group not found" });
+    }
+
+    // Flatten member.user into top-level properties for frontend compatibility
+    const flattenedMembers = group.members.map((m) => ({
+      id: m.id,
+      group_id: m.group_id,
+      user_id: m.user?.user_id || m.user_id,
+      name: m.user?.name || null,
+      email: m.user?.email || null,
+      joined_at: m.joined_at,
+      // keep original nested user for callers that expect it
+      user: m.user
+    }));
+
+    res.json({ ...group, members: flattenedMembers });
+  } catch (error) {
+    console.error("Error fetching group:", error);
+    res.status(500).json({ error: "Failed to fetch group" });
+  }
+};
+
 export const createGroup = async (req, res) => {
   const { name, description, created_by } = req.body;
   const creatorId = Number(created_by);
@@ -247,7 +279,18 @@ export const createGroup = async (req, res) => {
   // Fetch the group with members included
   const groupWithMembers = await Service.findGroup(group.group_id);
 
-  res.status(201).json(groupWithMembers);
+  // Flatten members for frontend convenience
+  const flattenedMembers = groupWithMembers.members.map((m) => ({
+    id: m.id,
+    group_id: m.group_id,
+    user_id: m.user?.user_id || m.user_id,
+    name: m.user?.name || null,
+    email: m.user?.email || null,
+    joined_at: m.joined_at,
+    user: m.user
+  }));
+
+  res.status(201).json({ ...groupWithMembers, members: flattenedMembers });
 };
 
 export const addMember = async (req, res) => {
