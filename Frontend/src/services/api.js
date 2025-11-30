@@ -24,6 +24,13 @@ export const authService = {
   getUsers: () => api.get('/users'),
 };
 
+export const friendService = {
+  getAll: (userId) => api.get(`/friends?user_id=${userId}`),
+  add: (userId, email) => api.post('/friends', { user_id: userId, email }),
+  remove: (userId, friendId) => api.delete(`/friends/${friendId}?user_id=${userId}`),
+  invite: (data) => api.post('/friends/invite', data),
+};
+
 export const groupService = {
   getAll: (userId) => api.get(`/groups?user_id=${userId}`),
   getById: (id) => api.get(`/groups/${id}`),

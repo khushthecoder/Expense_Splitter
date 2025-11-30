@@ -19,6 +19,22 @@ model User {
   settlementsPaid     Settlement[]   @relation("SettlementsPaid")
   settlementsReceived Settlement[]   @relation("SettlementsReceived")
   password             String 
+  friends              Friend[]       @relation("UserFriends")
+  friendOf             Friend[]       @relation("FriendUsers")
+}
+
+model Friend {
+  id        Int      @id @default(autoincrement())
+  user_id   Int
+  friend_id Int
+  status    String   @default("accepted") // accepted, pending
+  created_at DateTime @default(now())
+  user      User     @relation("UserFriends", fields: [user_id], references: [user_id])
+  friend    User     @relation("FriendUsers", fields: [friend_id], references: [user_id])
+
+  @@unique([user_id, friend_id])
+  @@index([user_id], map: "Friend_user_id_fkey")
+  @@index([friend_id], map: "Friend_friend_id_fkey")
 }
 
 model Group {

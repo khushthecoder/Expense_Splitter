@@ -83,11 +83,51 @@ export const userActivity = async (req, res) => {
   }
 };
 
+// FRIENDS
+export const getFriends = async (req, res) => {
+  const userId = Number(req.query.user_id);
+  const friends = await Service.getFriends(userId);
+  res.json(friends);
+};
+
+export const addFriend = async (req, res) => {
+  const { user_id, email } = req.body;
+  const userId = Number(user_id);
+
+  const friendUser = await Service.login(email);
+  if (!friendUser) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  if (friendUser.user_id === userId) {
+    return res.status(400).json({ error: "Cannot add yourself as friend" });
+  }
+
+  try {
+    const friend = await Service.addFriend(userId, friendUser.user_id);
+    res.status(201).json(friend);
+  } catch (error) {
+    res.status(400).json({ error: "Friendship already exists" });
+  }
+};
+
+export const removeFriend = async (req, res) => {
+  const userId = Number(req.query.user_id);
+  const friendId = Number(req.params.id);
+
+  try {
+    await Service.removeFriend(userId, friendId);
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: "Failed to remove friend" });
+  }
+};
+
 // GROUPS 
 export const getGroups = async (req, res) => {
   // If user_id is provided, get groups for that user, otherwise get all groups
   const userId = req.query.user_id ? Number(req.query.user_id) : null;
-  
+
   if (userId) {
     const groups = await Service.getGroupsByUserId(userId);
     res.json(groups);
@@ -100,7 +140,7 @@ export const getGroups = async (req, res) => {
 export const createGroup = async (req, res) => {
   const { name, description, created_by } = req.body;
   const creatorId = Number(created_by);
-  
+
   // Create the group
   const group = await Service.createGroup({
     name,
@@ -121,7 +161,7 @@ export const createGroup = async (req, res) => {
 
   // Fetch the group with members included
   const groupWithMembers = await Service.findGroup(group.group_id);
-  
+
   res.status(201).json(groupWithMembers);
 };
 
@@ -186,10 +226,10 @@ export const sendGroupInvitationEmail = async (req, res) => {
       invitationLink
     );
 
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       message: "Invitation sent successfully",
-      invitationLink 
+      invitationLink
     });
   } catch (error) {
     console.error("Error sending invitation:", error);
@@ -271,8 +311,8 @@ export const joinGroupViaInvitation = async (req, res) => {
       user_id: userId
     });
 
-    res.status(201).json({ 
-      success: true, 
+    res.status(201).json({
+      success: true,
       message: "Successfully joined the group",
       member,
       group: {
@@ -292,17 +332,17 @@ export const createExpense = async (req, res) => {
   const { group_id, paid_by, amount, description, splits } = req.body;
 
   const expense = await Service.createExpense({
-    group_id: Number(group_id),
+    group_id: group_id ? Number(group_id) : null,
     paid_by: Number(paid_by),
     amount: Number(amount),
     description,
     splits: splits
       ? {
-          create: splits.map((s) => ({
-            user_id: Number(s.user_id),
-            share: Number(s.share)
-          }))
-        }
+        create: splits.map((s) => ({
+          user_id: Number(s.user_id),
+          share: Number(s.share)
+        }))
+      }
       : undefined
   });
 
