@@ -12,6 +12,8 @@ export default function Groups() {
     const [newGroupName, setNewGroupName] = useState('');
     const [newGroupDesc, setNewGroupDesc] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [creating, setCreating] = useState(false);
+    const [createError, setCreateError] = useState('');
 
     useEffect(() => {
         fetchGroups();
@@ -19,11 +21,22 @@ export default function Groups() {
 
     const handleCreateGroup = async (e) => {
         e.preventDefault();
-        if (!newGroupName.trim()) return;
+        setCreateError('');
+
+        if (!newGroupName.trim()) {
+            setCreateError('Group name is required');
+            return;
+        }
+        if (newGroupName.trim().length < 3) {
+            setCreateError('Group name must be at least 3 characters');
+            return;
+        }
+
         try {
+            setCreating(true);
             await groupService.create({
-                name: newGroupName,
-                description: newGroupDesc,
+                name: newGroupName.trim(),
+                description: newGroupDesc.trim(),
                 created_by: user.user_id
             });
             setShowCreateModal(false);
@@ -32,6 +45,9 @@ export default function Groups() {
             fetchGroups();
         } catch (error) {
             console.error("Failed to create group", error);
+            setCreateError('Failed to create group. Please try again.');
+        } finally {
+            setCreating(false);
         }
     };
 
@@ -143,6 +159,11 @@ export default function Groups() {
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
                     <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
                         <h2 className="text-xl font-bold mb-4">Create New Group</h2>
+                        {createError && (
+                            <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg">
+                                {createError}
+                            </div>
+                        )}
                         <form onSubmit={handleCreateGroup} className="space-y-4">
                             <Input
                                 label="Group Name"
@@ -169,8 +190,8 @@ export default function Groups() {
                                 >
                                     Cancel
                                 </Button>
-                                <Button type="submit" className="flex-1">
-                                    Create Group
+                                <Button type="submit" className="flex-1" disabled={creating}>
+                                    {creating ? 'Creating...' : 'Create Group'}
                                 </Button>
                             </div>
                         </form>

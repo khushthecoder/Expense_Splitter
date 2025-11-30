@@ -7,7 +7,7 @@ const calculateBalances = (expenses) => {
   expenses.forEach(exp => {
     const paidBy = exp.paid_by || exp.payer?.user_id;
     const amount = parseFloat(exp.amount);
-    
+
     if (!bal[paidBy]) bal[paidBy] = 0;
     bal[paidBy] += amount;
 
@@ -121,7 +121,7 @@ export const useStore = create((set, get) => ({
       };
 
       await expenseService.create(payload);
-      
+
       get().fetchGroup(expenseData.group_id);
       get().addNotification(`New expense added: ${expenseData.description} ($${expenseData.amount})`);
     } catch (error) {
@@ -153,7 +153,7 @@ export const useStore = create((set, get) => ({
         paid_to: data.receiver,
         amount: data.amount
       });
-      
+
       get().fetchGroup(data.group_id);
       get().addNotification(`Settlement recorded: $${data.amount}`);
     } catch (error) {
@@ -163,26 +163,30 @@ export const useStore = create((set, get) => ({
     }
   },
 
-  addMember: async (name) => {
-    const { currentGroup } = get();
+  inviteMember: async (email) => {
+    const { currentGroup, user } = get();
     if (!currentGroup) return;
 
     try {
-      const randomSuffix = Date.now();
-      const newUserRes = await authService.signup({
-        name: name,
-        email: `${name.replace(/\s+/g, '').toLowerCase()}${randomSuffix}@example.com`,
-        phone: `${randomSuffix}`,
-        password: 'password'
-      });
-      const newUser = newUserRes.data;
+      // Check if user exists
+      const usersRes = await authService.getUsers();
+      const existingUser = usersRes.data.find(u => u.email === email);
 
-      await groupService.addMember(currentGroup.group_id, newUser.user_id);
+      if (existingUser) {
+        await groupService.addMember(currentGroup.group_id, existingUser.user_id);
+        get().addNotification(`${existingUser.name} added to group`);
+      } else {
+        await groupService.invite(currentGroup.group_id, {
+          recipient_email: email,
+          inviter_name: user.name
+        });
+        get().addNotification(`Invitation sent to ${email}`);
+      }
 
       get().fetchGroup(currentGroup.group_id);
-      get().addNotification(`${name} added to group`);
     } catch (error) {
-      console.error("Failed to add member", error);
+      console.error("Failed to invite member", error);
+      get().addNotification("Failed to invite member");
     }
   },
 

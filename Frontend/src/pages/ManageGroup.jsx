@@ -5,8 +5,8 @@ import { useStore } from '../store/useStore';
 export default function ManageGroup() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentGroup, addMember, removeMember } = useStore();
-  const [newMemberName, setNewMemberName] = useState('');
+  const { currentGroup, inviteMember, removeMember, balances } = useStore();
+  const [newMemberEmail, setNewMemberEmail] = useState('');
 
   if (!currentGroup) {
     return (
@@ -18,14 +18,20 @@ export default function ManageGroup() {
 
   const handleAddMember = (e) => {
     e.preventDefault();
-    if (newMemberName.trim()) {
-      addMember(newMemberName.trim());
-      setNewMemberName('');
+    if (newMemberEmail.trim()) {
+      inviteMember(newMemberEmail.trim());
+      setNewMemberEmail('');
     }
   };
 
   const handleRemoveMember = (userId) => {
-    if (window.confirm('Are you sure you want to remove this member?')) {
+    const memberBalance = balances[userId] || 0;
+    if (Math.abs(memberBalance) > 0.01) {
+      alert(`Cannot remove member. They have an outstanding balance of $${memberBalance.toFixed(2)}. Please settle up first.`);
+      return;
+    }
+
+    if (window.confirm('Are you sure you want to remove this member? This action cannot be undone.')) {
       removeMember(userId);
     }
   };
@@ -34,7 +40,7 @@ export default function ManageGroup() {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="container max-w-2xl animate-fade-in">
         <div className="mb-6">
-          <button 
+          <button
             onClick={() => navigate(`/groups/${id}`)}
             className="text-gray-500 hover:text-primary transition-colors flex items-center gap-2"
           >
@@ -61,18 +67,18 @@ export default function ManageGroup() {
             </h3>
             <form onSubmit={handleAddMember} className="flex gap-3">
               <input
-                type="text"
-                placeholder="Enter member name"
+                type="email"
+                placeholder="Enter member email"
                 className="form-control flex-1"
-                value={newMemberName}
-                onChange={(e) => setNewMemberName(e.target.value)}
+                value={newMemberEmail}
+                onChange={(e) => setNewMemberEmail(e.target.value)}
                 required
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn btn-primary whitespace-nowrap px-6"
               >
-                Add Member
+                Add / Invite
               </button>
             </form>
           </div>
@@ -83,11 +89,11 @@ export default function ManageGroup() {
               <span className="text-xl">👥</span>
               Group Members ({currentGroup.members.length})
             </h3>
-            
+
             <div className="space-y-3">
               {currentGroup.members.map((member) => (
-                <div 
-                  key={member.user_id} 
+                <div
+                  key={member.user_id}
                   className="flex justify-between items-center p-4 bg-white border border-gray-100 rounded-xl hover:shadow-md transition-all group"
                 >
                   <div className="flex items-center gap-3">
@@ -99,7 +105,7 @@ export default function ManageGroup() {
                       <p className="text-xs text-gray-400">Member since {new Date().getFullYear()}</p>
                     </div>
                   </div>
-                  
+
                   <button
                     onClick={() => handleRemoveMember(member.user_id)}
                     className="text-gray-400 hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
