@@ -4,12 +4,12 @@ import { useStore } from '../store/useStore';
 import { Card, Button, Badge } from '../components/ui';
 import Analytics from '../components/Analytics';
 import SettlementModal from '../components/SettlementModal';
-import { 
-  Plus, 
-  Settings, 
-  Trash2, 
-  Receipt, 
-  BarChart3, 
+import {
+  Plus,
+  Settings,
+  Trash2,
+  Receipt,
+  BarChart3,
   Wallet,
   ArrowRightLeft
 } from 'lucide-react';
@@ -23,6 +23,11 @@ export default function GroupDetail() {
 
   useEffect(() => {
     fetchGroup(id);
+    const interval = setInterval(() => {
+      fetchGroup(id);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [id]);
 
   if (loading || !currentGroup) {
@@ -83,11 +88,10 @@ export default function GroupDetail() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 pb-4 px-2 font-medium transition-colors relative ${
-                activeTab === tab.id 
-                  ? 'text-primary' 
+              className={`flex items-center gap-2 pb-4 px-2 font-medium transition-colors relative ${activeTab === tab.id
+                  ? 'text-primary'
                   : 'text-gray-500 hover:text-gray-700'
-              }`}
+                }`}
             >
               <tab.icon size={18} />
               {tab.label}
@@ -111,9 +115,8 @@ export default function GroupDetail() {
               expenses.map(expense => (
                 <Card key={expense.expense_id} className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
                   <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${
-                      expense.is_settlement ? 'bg-green-50 text-green-600' : 'bg-gray-50'
-                    }`}>
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${expense.is_settlement ? 'bg-green-50 text-green-600' : 'bg-gray-50'
+                      }`}>
                       {expense.is_settlement ? '🤝' : '🧾'}
                     </div>
                     <div>
@@ -132,7 +135,7 @@ export default function GroupDetail() {
                         </p>
                       )}
                     </div>
-                    <button 
+                    <button
                       onClick={() => deleteExpense(expense.expense_id)}
                       className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                     >
@@ -154,7 +157,7 @@ export default function GroupDetail() {
                 Settle Up
               </Button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {currentGroup.members.map(member => {
                 const balance = balances[member.user_id] || 0;
@@ -181,8 +184,8 @@ export default function GroupDetail() {
         )}
       </div>
 
-      <SettlementModal 
-        isOpen={isSettlementModalOpen} 
+      <SettlementModal
+        isOpen={isSettlementModalOpen}
         onClose={() => setIsSettlementModalOpen(false)}
         group={currentGroup}
       />

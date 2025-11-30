@@ -149,8 +149,8 @@ export default function Settings() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === tab.id
-                                        ? 'bg-primary text-white'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-primary text-white'
+                                    : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 <tab.icon size={20} />
@@ -293,8 +293,8 @@ export default function Settings() {
                                                 key={theme}
                                                 onClick={() => handleSettingsUpdate({ theme })}
                                                 className={`p-4 rounded-lg border-2 transition-all capitalize ${settings.theme === theme
-                                                        ? 'border-primary bg-primary/10'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-primary bg-primary/10'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 {theme}

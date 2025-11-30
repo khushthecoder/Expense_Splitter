@@ -37,6 +37,7 @@ export const groupService = {
   create: (data) => api.post('/groups', data),
   addMember: (groupId, userId) => api.post(`/groups/${groupId}/members`, { user_id: userId }),
   removeMember: (groupId, userId) => api.delete(`/groups/${groupId}/members/${userId}`),
+  invite: (groupId, data) => api.post(`/groups/${groupId}/invite`, data),
 };
 
 export const expenseService = {
