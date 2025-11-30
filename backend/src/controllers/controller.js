@@ -25,7 +25,7 @@ export const login = async (req, res) => {
     { expiresIn: '24h' }
   );
 
-  return res.status(200).json({ 
+  return res.status(200).json({
     token,
     user: {
       user_id: userInfo.user_id,
@@ -40,13 +40,25 @@ export const signup = async (req, res) => {
   try {
     const { password, ...rest } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     const user = await Service.createUser({
       ...rest,
       password: hashedPassword
     });
-    
-    return res.status(201).json(user);
+
+    const token = jwt.sign(
+      { id: user.user_id, email: user.email },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '24h' }
+    );
+
+    // Return user info (excluding password)
+    const { password: _, ...userInfo } = user;
+
+    return res.status(201).json({
+      token,
+      user: userInfo
+    });
   } catch (err) {
     if (err.code === "P2002")
       return res.status(400).json({ error: "Credentials already exist" });
@@ -82,6 +94,79 @@ export const userActivity = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user activity" });
   }
 };
+
+// SETTINGS
+export const getUserSettings = async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    let settings = await Service.getUserSettings(userId);
+
+    // Create default settings if they don't exist
+    if (!settings) {
+      settings = await Service.createUserSettings({ user_id: userId });
+    }
+
+    res.json(settings);
+  } catch (error) {
+    console.error("Error fetching settings:", error);
+    res.status(500).json({ error: "Failed to fetch settings" });
+  }
+};
+
+export const updateUserSettings = async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const settings = await Service.updateUserSettings(userId, req.body);
+    res.json(settings);
+  } catch (error) {
+    console.error("Error updating settings:", error);
+    res.status(500).json({ error: "Failed to update settings" });
+  }
+};
+
+export const updateUserProfile = async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const { name, email, phone } = req.body;
+
+    const user = await Service.updateUser(userId, { name, email, phone });
+    const { password: _, ...userInfo } = user;
+
+    res.json(userInfo);
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    if (error.code === "P2002") {
+      return res.status(400).json({ error: "Email or phone already exists" });
+    }
+    res.status(500).json({ error: "Failed to update profile" });
+  }
+};
+
+export const updateUserPassword = async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await Service.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await Service.updateUser(userId, { password: hashedPassword });
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ error: "Failed to update password" });
+  }
+};
+
 
 // FRIENDS
 export const getFriends = async (req, res) => {

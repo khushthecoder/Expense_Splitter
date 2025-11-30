@@ -16,9 +16,27 @@ const Service = {
     prisma.user.findUnique({
       where: { user_id: id }
     }),
-  getUserById: (id) =>
-    prisma.user.findUnique({
-      where: { user_id: id }
+
+  updateUser: (id, data) =>
+    prisma.user.update({
+      where: { user_id: id },
+      data
+    }),
+
+  // SETTINGS
+  getUserSettings: (user_id) =>
+    prisma.userSettings.findUnique({
+      where: { user_id }
+    }),
+
+  createUserSettings: (data) =>
+    prisma.userSettings.create({ data }),
+
+  updateUserSettings: (user_id, data) =>
+    prisma.userSettings.upsert({
+      where: { user_id },
+      update: data,
+      create: { user_id, ...data }
     }),
 
   // FRIENDS
@@ -187,7 +205,7 @@ const Service = {
         payer: { select: { user_id: true, name: true } },
         receiver: { select: { user_id: true, name: true } }
       },
-      orderBy: { id: "desc" }
+      orderBy: { settlement_id: "desc" }
     }),
 
   getUserSettlements: (user_id) => ({

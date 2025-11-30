@@ -22,6 +22,10 @@ import {
   getFriends,
   addFriend,
   removeFriend,
+  getUserSettings,
+  updateUserSettings,
+  updateUserProfile,
+  updateUserPassword,
 } from "../controllers/controller.js";
 
 const router = Router();
@@ -32,6 +36,12 @@ router.post("/signup", signup);
 router.get("/users", getUsers);
 router.get("/users/:id", getUser);
 router.get("/users/:id/activity", userActivity);
+
+// SETTINGS
+router.get("/users/:id/settings", getUserSettings);
+router.put("/users/:id/settings", updateUserSettings);
+router.put("/users/:id/profile", updateUserProfile);
+router.put("/users/:id/password", updateUserPassword);
 
 // FRIENDS
 router.get("/friends", getFriends);
