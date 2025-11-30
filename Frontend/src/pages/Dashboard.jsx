@@ -1,161 +1,261 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import { Card, Button, Input } from '../components/ui';
-import { Plus, Search, Users, ArrowRight } from 'lucide-react';
-import { groupService } from '../services/api';
+import { Card, Button } from '../components/ui';
+import { Plus, TrendingUp, TrendingDown, Clock, Users, DollarSign, ArrowRight } from 'lucide-react';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export default function Dashboard() {
   const { user, groups, fetchGroups, loading } = useStore();
   const navigate = useNavigate();
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newGroupName, setNewGroupName] = useState('');
-  const [newGroupDesc, setNewGroupDesc] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [activity, setActivity] = useState([]);
+  const [balances, setBalances] = useState({ youOwe: 0, youAreOwed: 0 });
+  const [loadingActivity, setLoadingActivity] = useState(true);
 
   useEffect(() => {
-    fetchGroups();
-  }, []);
-
-  const handleCreateGroup = async (e) => {
-    e.preventDefault();
-    if (!newGroupName.trim()) return;
-    try {
-      await groupService.create({
-        name: newGroupName,
-        description: newGroupDesc,
-        created_by: user.user_id
-      });
-      setShowCreateModal(false);
-      setNewGroupName('');
-      setNewGroupDesc('');
+    if (user) {
       fetchGroups();
-    } catch (error) {
-      console.error("Failed to create group", error);
+      fetchActivity();
+      calculateBalances();
+    }
+  }, [user]);
+
+  const fetchActivity = async () => {
+    try {
+      setLoadingActivity(true);
+      const res = await axios.get(`${API_URL}/users/${user.user_id}/activity`);
+      setActivity(res.data.slice(0, 10)); // Show latest 10 activities
+    } catch (err) {
+      console.error('Failed to fetch activity', err);
+    } finally {
+      setLoadingActivity(false);
     }
   };
 
-  const filteredGroups = groups.filter(g => 
-    g.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const calculateBalances = async () => {
+    try {
+      // Fetch all expenses where user is involved
+      const groupExpensesPromises = groups.map(g =>
+        axios.get(`${API_URL}/groups/${g.group_id}/expenses`)
+      );
+
+      const allExpenses = (await Promise.all(groupExpensesPromises))
+        .flatMap(res => res.data);
+
+      let totalOwed = 0;
+      let totalOwing = 0;
+
+      allExpenses.forEach(expense => {
+        const userSplit = expense.splits?.find(s => s.user_id === user.user_id);
+        if (!userSplit) return;
+
+        const splitAmount = parseFloat(userSplit.share);
+
+        if (expense.paid_by === user.user_id) {
+          // User paid, others owe them
+          totalOwed += parseFloat(expense.amount) - splitAmount;
+        } else {
+          // Someone else paid, user owes them
+          totalOwing += splitAmount;
+        }
+      });
+
+      setBalances({ youOwe: totalOwing, youAreOwed: totalOwed });
+    } catch (err) {
+      console.error('Failed to calculate balances', err);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+
+  const formatDate = (date) => {
+    const d = new Date(date);
+    const now = new Date();
+    const diffMs = now - d;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return d.toLocaleDateString();
+  };
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
+      {/* Header with Quick Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Groups</h1>
-          <p className="text-gray-500">Manage your shared expenses</p>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-500">Welcome back, {user?.name}!</p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)} className="gap-2">
-          <Plus size={20} />
-          Create Group
-        </Button>
-      </div>
-
-      {/* Search Bar */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-        <input
-          type="text"
-          placeholder="Search groups..."
-          className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-
-      {/* Groups Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
-          ))}
-        </div>
-      ) : filteredGroups.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 border-dashed">
-          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users size={32} className="text-gray-400" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900">No groups found</h3>
-          <p className="text-gray-500 mb-6">Create a new group to start splitting expenses</p>
-          <Button variant="secondary" onClick={() => setShowCreateModal(true)}>
-            Create New Group
+        <div className="flex gap-3">
+          <Button
+            onClick={() => navigate('/groups/null/add-expense')}
+            className="gap-2"
+            variant="secondary"
+          >
+            <Plus size={20} />
+            Quick Add Expense
           </Button>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredGroups.map(group => (
-            <Card 
-              key={group.group_id} 
-              className="p-6 cursor-pointer group hover:border-primary/50"
-              onClick={() => navigate(`/groups/${group.group_id}`)}
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center text-primary font-bold text-xl">
-                  {group.name.charAt(0).toUpperCase()}
-                </div>
-                <div className="bg-gray-50 px-3 py-1 rounded-full text-xs font-medium text-gray-600 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                  View Details
-                </div>
-              </div>
-              
-              <h3 className="text-lg font-bold text-gray-900 mb-1">{group.name}</h3>
-              <p className="text-sm text-gray-500 line-clamp-2 mb-4 h-10">
-                {group.description || 'No description'}
-              </p>
+      </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                <div className="flex items-center gap-2 text-gray-500 text-sm">
-                  <Users size={16} />
-                  <span>{group.members?.length || 0} members</span>
-                </div>
-                <ArrowRight size={16} className="text-gray-300 group-hover:text-primary transition-colors transform group-hover:translate-x-1" />
+      {/* Balance Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="p-6 bg-gradient-to-br from-red-50 to-orange-50 border-red-100">
+          <div className="flex items-start justify-between mb-4">
+            <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+              <TrendingDown className="text-red-600" size={24} />
+            </div>
+            <span className="text-sm font-medium text-red-600 bg-red-100 px-3 py-1 rounded-full">
+              You Owe
+            </span>
+          </div>
+          <h3 className="text-3xl font-bold text-gray-900 mb-1">
+            {formatCurrency(balances.youOwe)}
+          </h3>
+          <p className="text-sm text-gray-600">Total amount you owe to others</p>
+        </Card>
+
+        <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-green-100">
+          <div className="flex items-start justify-between mb-4">
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <TrendingUp className="text-green-600" size={24} />
+            </div>
+            <span className="text-sm font-medium text-green-600 bg-green-100 px-3 py-1 rounded-full">
+              You Are Owed
+            </span>
+          </div>
+          <h3 className="text-3xl font-bold text-gray-900 mb-1">
+            {formatCurrency(balances.youAreOwed)}
+          </h3>
+          <p className="text-sm text-gray-600">Total amount others owe you</p>
+        </Card>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Activity */}
+        <div className="lg:col-span-2">
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Clock size={20} />
+                Recent Activity
+              </h2>
+            </div>
+
+            {loadingActivity ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-16 bg-gray-100 rounded-lg animate-pulse" />
+                ))}
               </div>
-            </Card>
-          ))}
+            ) : activity.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Clock size={48} className="mx-auto mb-3 text-gray-300" />
+                <p>No recent activity</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {activity.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${item.flow === 'out' ? 'bg-red-100' : 'bg-green-100'
+                      }`}>
+                      <DollarSign size={20} className={
+                        item.flow === 'out' ? 'text-red-600' : 'text-green-600'
+                      } />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{item.title}</p>
+                      <p className="text-sm text-gray-500">{item.group} • {item.details}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`font-bold ${item.flow === 'out' ? 'text-red-600' : 'text-green-600'
+                        }`}>
+                        {item.flow === 'out' ? '-' : '+'}{formatCurrency(item.amount)}
+                      </p>
+                      <p className="text-xs text-gray-500">{formatDate(item.date)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
         </div>
-      )}
 
-      {/* Create Group Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
-            <h2 className="text-xl font-bold mb-4">Create New Group</h2>
-            <form onSubmit={handleCreateGroup} className="space-y-4">
-              <Input
-                label="Group Name"
-                placeholder="e.g. Trip to Goa"
-                value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-                required
-              />
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Description</label>
-                <textarea
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary-light/20 outline-none transition-all resize-none h-24"
-                  placeholder="What's this group for?"
-                  value={newGroupDesc}
-                  onChange={(e) => setNewGroupDesc(e.target.value)}
-                />
+        {/* Group Summaries */}
+        <div>
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Users size={20} />
+                Your Groups
+              </h2>
+              <button
+                onClick={() => navigate('/groups')}
+                className="text-sm text-primary hover:text-primary-hover font-medium"
+              >
+                View All
+              </button>
+            </div>
+
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-16 bg-gray-100 rounded-lg animate-pulse" />
+                ))}
               </div>
-              <div className="flex gap-3 pt-2">
-                <Button 
-                  type="button" 
-                  variant="secondary" 
-                  className="flex-1"
-                  onClick={() => setShowCreateModal(false)}
+            ) : groups.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Users size={48} className="mx-auto mb-3 text-gray-300" />
+                <p className="mb-4">No groups yet</p>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => navigate('/groups')}
                 >
-                  Cancel
-                </Button>
-                <Button type="submit" className="flex-1">
                   Create Group
                 </Button>
               </div>
-            </form>
-          </div>
+            ) : (
+              <div className="space-y-3">
+                {groups.slice(0, 5).map(group => (
+                  <div
+                    key={group.group_id}
+                    onClick={() => navigate(`/groups/${group.group_id}`)}
+                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer group"
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg flex items-center justify-center text-primary font-bold">
+                      {group.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{group.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {group.members?.length || 0} members
+                      </p>
+                    </div>
+                    <ArrowRight size={16} className="text-gray-300 group-hover:text-primary transition-colors" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
         </div>
-      )}
+      </div>
     </div>
   );
 }
