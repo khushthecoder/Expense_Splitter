@@ -100,7 +100,17 @@ export default function Dashboard() {
         </div>
         <div className="flex gap-3">
           <Button
-            onClick={() => navigate('/groups/null/add-expense')}
+            onClick={() => {
+              if (groups.length === 0) {
+                alert("Please create a group first.");
+              } else if (groups.length === 1) {
+                navigate(`/groups/${groups[0].group_id}/add-expense`);
+              } else {
+                alert("Please select a group from the list below to add an expense.");
+                // Optionally scroll to groups section
+                document.getElementById('groups-section')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
             className="gap-2"
             variant="secondary"
           >
@@ -199,7 +209,7 @@ export default function Dashboard() {
 
         {/* Group Summaries */}
         <div>
-          <Card className="p-6">
+          <Card className="p-6" id="groups-section">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                 <Users size={20} />
