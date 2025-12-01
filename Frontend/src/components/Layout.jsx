@@ -70,7 +70,15 @@ export default function Layout({ children }) {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-gray-50 dark:border-gray-700">
+        <div className="p-4 border-t border-gray-50 dark:border-gray-700 space-y-2">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-200 font-medium"
+          >
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          </button>
+
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-200 font-medium"
@@ -117,13 +125,23 @@ export default function Layout({ children }) {
               {item.label}
             </NavLink>
           ))}
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-200 font-medium mt-4"
-          >
-            <LogOut size={20} />
-            Logout
-          </button>
+          <div className="mt-auto pt-4 border-t border-gray-50 dark:border-gray-700 space-y-2">
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-200 font-medium"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </button>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-200 font-medium"
+            >
+              <LogOut size={20} />
+              Logout
+            </button>
+          </div>
         </nav>
       </aside>
 
@@ -144,15 +162,6 @@ export default function Layout({ children }) {
           </div>
 
           <div className="flex items-center gap-6">
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary-light transition-colors rounded-full hover:bg-indigo-50 dark:hover:bg-gray-700"
-              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            >
-              {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
-            </button>
-
             {/* Notifications */}
             <div className="relative">
               <button className="p-2 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary-light transition-colors rounded-full hover:bg-indigo-50 dark:hover:bg-gray-700 relative">
