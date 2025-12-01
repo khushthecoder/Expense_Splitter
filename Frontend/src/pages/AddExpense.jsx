@@ -10,7 +10,7 @@ export default function AddExpense() {
   const [searchParams] = useSearchParams();
   const friendId = searchParams.get('friend_id');
   const navigate = useNavigate();
-  const { currentGroup, fetchGroup, addExpense, loading, user } = useStore();
+  const { currentGroup, fetchGroup, addExpense, loading, user, error } = useStore();
 
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -170,7 +170,26 @@ export default function AddExpense() {
     }
   };
 
-  if (!members.length) return <div className="flex justify-center p-8">Loading...</div>;
+  if (loading) return <div className="flex justify-center p-8">Loading...</div>;
+
+  if (error) return (
+    <div className="flex flex-col items-center justify-center p-8 text-red-500">
+      <p className="text-lg font-semibold mb-2">Error loading data</p>
+      <p>{error}</p>
+      <Button variant="secondary" className="mt-4" onClick={() => navigate('/dashboard')}>
+        Go to Dashboard
+      </Button>
+    </div>
+  );
+
+  if (!members.length) return (
+    <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+      <p className="text-lg mb-2">No members found in this group.</p>
+      <Button variant="secondary" onClick={() => navigate('/dashboard')}>
+        Go to Dashboard
+      </Button>
+    </div>
+  );
 
   return (
     <div className="max-w-2xl mx-auto">
