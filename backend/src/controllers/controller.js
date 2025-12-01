@@ -3,6 +3,9 @@ import { sendGroupInvitation } from "../services/emailService.js";
 
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 //USERS 
 export const login = async (req, res) => {
@@ -64,6 +67,48 @@ export const signup = async (req, res) => {
       return res.status(400).json({ error: "Credentials already exist" });
 
     return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const googleLogin = async (req, res) => {
+  const { token } = req.body;
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const { name, email, picture } = ticket.getPayload();
+
+    let user = await Service.login(email);
+
+    if (!user) {
+      // Create new user with random password
+      const randomPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      user = await Service.createUser({
+        name,
+        email,
+        password: hashedPassword,
+        phone: '' // Phone is optional or can be asked later
+      });
+    }
+
+    const jwtToken = jwt.sign(
+      { id: user.user_id, email: user.email },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '24h' }
+    );
+
+    const { password: _, ...userInfo } = user;
+
+    return res.status(200).json({
+      token: jwtToken,
+      user: userInfo
+    });
+  } catch (error) {
+    console.error("Google login error:", error);
+    return res.status(401).json({ error: "Google authentication failed" });
   }
 };
 
