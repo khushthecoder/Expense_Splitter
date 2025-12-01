@@ -27,7 +27,6 @@ import {
   updateUserSettings,
   updateUserProfile,
   updateUserPassword,
-  googleLogin,
 } from "../controllers/controller.js";
 
 const router = Router();
@@ -35,7 +34,6 @@ const router = Router();
 // USERS
 router.post("/login", login);
 router.post("/signup", signup);
-router.post("/auth/google", googleLogin);
 router.get("/users", getUsers);
 router.get("/users/:id", getUser);
 router.get("/users/:id/activity", userActivity);

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
 import { useStore } from '../store/useStore';
 import { authService } from '../services/api';
 import { Card, Button, Input } from '../components/ui';
@@ -13,7 +12,7 @@ export default function Login() {
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
+  
   const navigate = useNavigate();
   const setUser = useStore((state) => state.setUser);
 
@@ -40,20 +39,6 @@ export default function Login() {
       setError(err.response?.data?.error || 'Authentication failed');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async (credentialResponse) => {
-    try {
-      const res = await authService.googleLogin(credentialResponse.credential);
-      if (res.data) {
-        localStorage.setItem('token', res.data.token);
-        setUser(res.data.user);
-        navigate('/');
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.error || 'Google Login failed');
     }
   };
 
@@ -119,30 +104,13 @@ export default function Login() {
               </div>
             )}
 
-            <Button
-              type="submit"
+            <Button 
+              type="submit" 
               className="w-full py-3 text-lg"
               disabled={loading}
             >
               {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
             </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="flex justify-center">
-              <GoogleLogin
-                onSuccess={handleGoogleLogin}
-                onError={() => setError('Google Login Failed')}
-                useOneTap
-              />
-            </div>
           </form>
 
           <div className="mt-8 pt-6 border-t border-gray-100 text-center">
