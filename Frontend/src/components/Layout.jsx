@@ -163,14 +163,7 @@ export default function Layout({ children }) {
 
           <div className="flex items-center gap-6">
             {/* Notifications */}
-            <div className="relative">
-              <button className="p-2 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary-light transition-colors rounded-full hover:bg-indigo-50 dark:hover:bg-gray-700 relative">
-                <Bell size={24} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 dark:bg-red-400 rounded-full border-2 border-white dark:border-gray-800" />
-                )}
-              </button>
-            </div>
+
 
             {/* User Profile */}
             <div className="relative">
