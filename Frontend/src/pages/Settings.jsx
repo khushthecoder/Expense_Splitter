@@ -25,21 +25,7 @@ export default function Settings() {
         confirmPassword: ''
     });
 
-    const [settings, setSettings] = useState({
-        language: 'en',
-        currency: 'USD',
-        notifications_push: true,
-        notifications_email: true,
-        default_split_mode: 'equal',
-        default_category: 'General',
-        default_payment_method: 'Cash'
-    });
 
-    useEffect(() => {
-        if (user?.settings) {
-            setSettings(prev => ({ ...prev, ...user.settings }));
-        }
-    }, [user]);
 
     const handleProfileUpdate = async (e) => {
         e.preventDefault();
@@ -50,7 +36,7 @@ export default function Settings() {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.put(
-                `${API_URL}/users/profile`,
+                `${API_URL}/users/${user.user_id}/profile`,
                 profileData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -78,7 +64,7 @@ export default function Settings() {
         try {
             const token = localStorage.getItem('token');
             await axios.put(
-                `${API_URL}/users/password`,
+                `${API_URL}/users/${user.user_id}/password`,
                 {
                     currentPassword: passwordData.currentPassword,
                     newPassword: passwordData.newPassword
@@ -95,28 +81,9 @@ export default function Settings() {
         }
     };
 
-    const handleSettingsUpdate = async (newSettings) => {
-        const updatedSettings = { ...settings, ...newSettings };
-        setSettings(updatedSettings);
-
-        try {
-            const token = localStorage.getItem('token');
-            await axios.put(
-                `${API_URL}/users/settings`,
-                updatedSettings,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
-            setUser({ ...user, settings: updatedSettings });
-        } catch (err) {
-            console.error('Failed to save settings:', err);
-        }
-    };
-
     const tabs = [
         { id: 'profile', label: 'Profile', icon: User },
-        { id: 'security', label: 'Security', icon: Shield },
-        { id: 'notifications', label: 'Notifications', icon: Bell }
+        { id: 'security', label: 'Security', icon: Shield }
     ];
 
     return (
@@ -223,49 +190,6 @@ export default function Settings() {
                                         {loading ? 'Updating...' : 'Update Password'}
                                     </Button>
                                 </form>
-                            </div>
-                        )}
-
-                        {activeTab === 'notifications' && (
-                            <div className="space-y-6">
-                                <div>
-                                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Notification Settings</h2>
-                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Control how you receive notifications</p>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                        <div>
-                                            <h3 className="font-medium text-gray-900 dark:text-gray-100">Push Notifications</h3>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">Receive push notifications for updates</p>
-                                        </div>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={settings.notifications_push}
-                                                onChange={(e) => handleSettingsUpdate({ notifications_push: e.target.checked })}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                        </label>
-                                    </div>
-
-                                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                                        <div>
-                                            <h3 className="font-medium text-gray-900 dark:text-gray-100">Email Notifications</h3>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">Receive email updates and summaries</p>
-                                        </div>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={settings.notifications_email}
-                                                onChange={(e) => handleSettingsUpdate({ notifications_email: e.target.checked })}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                        </label>
-                                    </div>
-                                </div>
                             </div>
                         )}
                     </Card>
