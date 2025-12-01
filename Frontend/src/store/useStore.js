@@ -25,6 +25,7 @@ const calculateBalances = (expenses) => {
 
 export const useStore = create((set, get) => ({
   user: JSON.parse(localStorage.getItem('user')) || null,
+  theme: localStorage.getItem('theme') || 'auto',
   groups: [],
   currentGroup: null,
   expenses: [],
@@ -36,6 +37,11 @@ export const useStore = create((set, get) => ({
   setUser: (user) => {
     localStorage.setItem('user', JSON.stringify(user));
     set({ user });
+  },
+
+  setTheme: (theme) => {
+    localStorage.setItem('theme', theme);
+    set({ theme });
   },
 
   logout: () => {

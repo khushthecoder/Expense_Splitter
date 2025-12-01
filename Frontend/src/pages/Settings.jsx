@@ -7,7 +7,7 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export default function Settings() {
-    const { user, setUser } = useStore();
+    const { user, setUser, theme, setTheme } = useStore();
     const [activeTab, setActiveTab] = useState('profile');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
@@ -29,7 +29,7 @@ export default function Settings() {
 
     // Settings state
     const [settings, setSettings] = useState({
-        theme: 'auto',
+        theme: theme,
         language: 'en',
         currency: 'USD',
         timezone: 'UTC',
@@ -103,12 +103,21 @@ export default function Settings() {
     };
 
     const handleSettingsUpdate = async (updates) => {
+        // Handle theme update locally first for immediate feedback
+        if (updates.theme) {
+            setTheme(updates.theme);
+        }
+
         try {
             const res = await axios.put(`${API_URL}/users/${user.user_id}/settings`, updates);
-            setSettings(res.data);
+            setSettings(prev => ({ ...prev, ...updates }));
             setSuccess('Settings updated successfully!');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
+            // Revert theme if API fails
+            if (updates.theme) {
+                setTheme(settings.theme);
+            }
             setError('Failed to update settings');
             setTimeout(() => setError(''), 3000);
         }
@@ -288,11 +297,11 @@ export default function Settings() {
                                         Theme
                                     </h3>
                                     <div className="grid grid-cols-3 gap-3">
-                                        {['light', 'dark', 'auto'].map(theme => (
+                                        {['light', 'dark', 'auto'].map(themeOption => (
                                             <button
-                                                key={theme}
-                                                onClick={() => handleSettingsUpdate({ theme })}
-                                                className={`p-4 rounded-lg border-2 transition-all capitalize ${settings.theme === theme
+                                                key={themeOption}
+                                                onClick={() => handleSettingsUpdate({ theme: themeOption })}
+                                                className={`p-4 rounded-lg border-2 transition-all capitalize ${theme === themeOption
                                                     ? 'border-primary bg-primary/10'
                                                     : 'border-gray-200 hover:border-gray-300'
                                                     }`}
