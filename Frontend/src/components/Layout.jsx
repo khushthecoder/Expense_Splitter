@@ -177,7 +177,7 @@ export default function Layout({ children }) {
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{user?.name}</p>
                 </div>
-                <ChevronDown size={16} className="text-gray-400 dark:text-gray-500 hidden md:block" />
+
               </button>
             </div>
           </div>
