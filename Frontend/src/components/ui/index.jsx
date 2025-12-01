@@ -7,19 +7,19 @@ export function cn(...inputs) {
 }
 
 export const Card = ({ className, children, ...props }) => (
-  <div className={cn("bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200", className)} {...props}>
+  <div className={cn("bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200", className)} {...props}>
     {children}
   </div>
 );
 
 export const Button = ({ className, variant = 'primary', size = 'md', ...props }) => {
   const variants = {
-    primary: "bg-primary text-white shadow-lg shadow-indigo-200 hover:bg-primary-hover hover:shadow-indigo-300",
-    secondary: "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300",
-    danger: "bg-red-50 text-red-600 hover:bg-red-100",
-    ghost: "text-gray-500 hover:text-gray-900 hover:bg-gray-50",
+    primary: "bg-primary text-white shadow-lg shadow-indigo-200 hover:bg-primary-hover hover:shadow-indigo-300 dark:shadow-none",
+    secondary: "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300",
+    danger: "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30",
+    ghost: "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800",
   };
-  
+
   const sizes = {
     sm: "px-3 py-1.5 text-sm",
     md: "px-4 py-2",
@@ -27,7 +27,7 @@ export const Button = ({ className, variant = 'primary', size = 'md', ...props }
   };
 
   return (
-    <button 
+    <button
       className={cn(
         "inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
         variants[variant],
@@ -41,10 +41,10 @@ export const Button = ({ className, variant = 'primary', size = 'md', ...props }
 
 export const Input = ({ className, label, error, ...props }) => (
   <div className="w-full">
-    {label && <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>}
-    <input 
+    {label && <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{label}</label>}
+    <input
       className={cn(
-        "w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary-light/20 outline-none transition-all duration-200",
+        "w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary-light/20 outline-none transition-all duration-200 dark:bg-gray-900 dark:border-gray-700 dark:text-white dark:focus:bg-gray-800 dark:focus:ring-primary/20",
         error && "border-red-500 focus:border-red-500 focus:ring-red-100",
         className
       )}

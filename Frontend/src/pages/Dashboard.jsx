@@ -95,8 +95,8 @@ export default function Dashboard() {
       {/* Header with Quick Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500">Welcome back, {user?.name}!</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-gray-500 dark:text-gray-400">Welcome back, {user?.name}!</p>
         </div>
         <div className="flex gap-3">
           <Button
@@ -122,7 +122,7 @@ export default function Dashboard() {
 
       {/* Balance Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="p-6 bg-gradient-to-br from-red-50 to-orange-50 border-red-100">
+        <Card className="p-6 bg-gradient-to-br from-red-50 to-orange-50 border-red-100 dark:from-red-900/20 dark:to-orange-900/20 dark:border-red-900/30">
           <div className="flex items-start justify-between mb-4">
             <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
               <TrendingDown className="text-red-600" size={24} />
@@ -131,13 +131,13 @@ export default function Dashboard() {
               You Owe
             </span>
           </div>
-          <h3 className="text-3xl font-bold text-gray-900 mb-1">
+          <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
             {formatCurrency(balances.youOwe)}
           </h3>
-          <p className="text-sm text-gray-600">Total amount you owe to others</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">Total amount you owe to others</p>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-green-100">
+        <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-green-100 dark:from-green-900/20 dark:to-emerald-900/20 dark:border-green-900/30">
           <div className="flex items-start justify-between mb-4">
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <TrendingUp className="text-green-600" size={24} />
@@ -146,10 +146,10 @@ export default function Dashboard() {
               You Are Owed
             </span>
           </div>
-          <h3 className="text-3xl font-bold text-gray-900 mb-1">
+          <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
             {formatCurrency(balances.youAreOwed)}
           </h3>
-          <p className="text-sm text-gray-600">Total amount others owe you</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">Total amount others owe you</p>
         </Card>
       </div>
 
@@ -159,7 +159,7 @@ export default function Dashboard() {
         <div className="lg:col-span-2">
           <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Clock size={20} />
                 Recent Activity
               </h2>
@@ -172,8 +172,8 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : activity.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Clock size={48} className="mx-auto mb-3 text-gray-300" />
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <Clock size={48} className="mx-auto mb-3 text-gray-300 dark:text-gray-600" />
                 <p>No recent activity</p>
               </div>
             ) : (
@@ -181,7 +181,7 @@ export default function Dashboard() {
                 {activity.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   >
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${item.flow === 'out' ? 'bg-red-100' : 'bg-green-100'
                       }`}>
@@ -190,15 +190,15 @@ export default function Dashboard() {
                       } />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{item.title}</p>
-                      <p className="text-sm text-gray-500">{item.group} • {item.details}</p>
+                      <p className="font-medium text-gray-900 dark:text-white truncate">{item.title}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{item.group} • {item.details}</p>
                     </div>
                     <div className="text-right">
                       <p className={`font-bold ${item.flow === 'out' ? 'text-red-600' : 'text-green-600'
                         }`}>
                         {item.flow === 'out' ? '-' : '+'}{formatCurrency(item.amount)}
                       </p>
-                      <p className="text-xs text-gray-500">{formatDate(item.date)}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(item.date)}</p>
                     </div>
                   </div>
                 ))}
@@ -211,7 +211,7 @@ export default function Dashboard() {
         <div>
           <Card className="p-6" id="groups-section">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Users size={20} />
                 Your Groups
               </h2>
@@ -230,8 +230,8 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : groups.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Users size={48} className="mx-auto mb-3 text-gray-300" />
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <Users size={48} className="mx-auto mb-3 text-gray-300 dark:text-gray-600" />
                 <p className="mb-4">No groups yet</p>
                 <Button
                   variant="secondary"
@@ -247,18 +247,18 @@ export default function Dashboard() {
                   <div
                     key={group.group_id}
                     onClick={() => navigate(`/groups/${group.group_id}`)}
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer group"
+                    className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
                   >
                     <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg flex items-center justify-center text-primary font-bold">
                       {group.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{group.name}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="font-medium text-gray-900 dark:text-white truncate">{group.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {group.members?.length || 0} members
                       </p>
                     </div>
-                    <ArrowRight size={16} className="text-gray-300 group-hover:text-primary transition-colors" />
+                    <ArrowRight size={16} className="text-gray-300 dark:text-gray-600 group-hover:text-primary transition-colors" />
                   </div>
                 ))}
               </div>
