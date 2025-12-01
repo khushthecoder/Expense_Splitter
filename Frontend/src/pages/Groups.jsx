@@ -60,8 +60,8 @@ export default function Groups() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">My Groups</h1>
-                    <p className="text-gray-500">Manage your shared expenses across groups</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Groups</h1>
+                    <p className="text-gray-500 dark:text-gray-400">Manage your shared expenses across groups</p>
                 </div>
                 <Button onClick={() => setShowCreateModal(true)} className="gap-2">
                     <Plus size={20} />
@@ -75,7 +75,7 @@ export default function Groups() {
                 <input
                     type="text"
                     placeholder="Search groups..."
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:bg-gray-700"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -85,16 +85,16 @@ export default function Groups() {
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="h-64 bg-gray-100 rounded-2xl animate-pulse" />
+                        <div key={i} className="h-64 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse" />
                     ))}
                 </div>
             ) : filteredGroups.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 border-dashed">
-                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Users size={32} className="text-gray-400" />
+                <div className="text-center py-12 bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 border-dashed">
+                    <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Users size={32} className="text-gray-400 dark:text-gray-500" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900">No groups found</h3>
-                    <p className="text-gray-500 mb-6">Create a new group to start splitting expenses</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No groups found</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6">Create a new group to start splitting expenses</p>
                     <Button variant="secondary" onClick={() => setShowCreateModal(true)}>
                         Create New Group
                     </Button>
@@ -112,18 +112,18 @@ export default function Groups() {
                                 </div>
                                 <button
                                     onClick={() => navigate(`/groups/${group.group_id}`)}
-                                    className="bg-gray-50 px-3 py-1 rounded-full text-xs font-medium text-gray-600 hover:bg-primary/10 hover:text-primary transition-colors"
+                                    className="bg-gray-50 dark:bg-gray-700/50 px-3 py-1 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-primary/10 hover:text-primary transition-colors"
                                 >
                                     View Details
                                 </button>
                             </div>
 
-                            <h3 className="text-lg font-bold text-gray-900 mb-1">{group.name}</h3>
-                            <p className="text-sm text-gray-500 line-clamp-2 mb-4 h-10">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{group.name}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 h-10">
                                 {group.description || 'No description'}
                             </p>
 
-                            <div className="flex items-center gap-2 text-gray-500 text-sm mb-4 pb-4 border-b border-gray-100">
+                            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-4 pb-4 border-b border-gray-100 dark:border-gray-700">
                                 <Users size={16} />
                                 <span>{group.members?.length || 0} members</span>
                             </div>
@@ -157,8 +157,8 @@ export default function Groups() {
             {/* Create Group Modal */}
             {showCreateModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
-                        <h2 className="text-xl font-bold mb-4">Create New Group</h2>
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+                        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Create New Group</h2>
                         {createError && (
                             <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg">
                                 {createError}
@@ -173,9 +173,9 @@ export default function Groups() {
                                 required
                             />
                             <div className="space-y-1.5">
-                                <label className="block text-sm font-medium text-gray-700">Description</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                                 <textarea
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary-light/20 outline-none transition-all resize-none h-24"
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary-light/20 outline-none transition-all resize-none h-24 dark:bg-gray-900 dark:border-gray-700 dark:text-white dark:focus:bg-gray-800"
                                     placeholder="What's this group for?"
                                     value={newGroupDesc}
                                     onChange={(e) => setNewGroupDesc(e.target.value)}

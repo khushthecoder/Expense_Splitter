@@ -19,7 +19,7 @@ export const Button = ({ className, variant = 'primary', size = 'md', ...props }
     danger: "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50",
     ghost: "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700",
   };
-  
+
   const sizes = {
     sm: "px-3 py-1.5 text-sm",
     md: "px-4 py-2",
@@ -27,7 +27,7 @@ export const Button = ({ className, variant = 'primary', size = 'md', ...props }
   };
 
   return (
-    <button 
+    <button
       className={cn(
         "inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
         variants[variant],

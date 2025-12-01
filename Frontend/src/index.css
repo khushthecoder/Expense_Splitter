@@ -16,7 +16,7 @@
   }
   
   .btn-primary {
-    @apply bg-primary text-white shadow-lg shadow-indigo-200 hover:bg-primary-hover hover:shadow-indigo-300;
+    @apply bg-primary text-white shadow-lg shadow-indigo-200 hover:bg-primary-hover hover:shadow-indigo-300 dark:shadow-none;
   }
   
   .btn-secondary {

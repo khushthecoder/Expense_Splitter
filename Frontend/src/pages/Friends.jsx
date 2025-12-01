@@ -89,8 +89,8 @@ export default function Friends() {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">My Friends</h1>
-                    <p className="text-gray-500">Manage your friends and expenses</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Friends</h1>
+                    <p className="text-gray-500 dark:text-gray-400">Manage your friends and expenses</p>
                 </div>
                 <Button onClick={() => setShowAddModal(true)} className="gap-2">
                     <UserPlus size={20} />
@@ -103,7 +103,7 @@ export default function Friends() {
                 <input
                     type="text"
                     placeholder="Search friends..."
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:bg-gray-700"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -112,16 +112,16 @@ export default function Friends() {
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="h-24 bg-gray-100 rounded-2xl animate-pulse" />
+                        <div key={i} className="h-24 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse" />
                     ))}
                 </div>
             ) : filteredFriends.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 border-dashed">
-                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Users size={32} className="text-gray-400" />
+                <div className="text-center py-12 bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 border-dashed">
+                    <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Users size={32} className="text-gray-400 dark:text-gray-500" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900">No friends found</h3>
-                    <p className="text-gray-500 mb-6">Add friends to start splitting expenses with them</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No friends found</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6">Add friends to start splitting expenses with them</p>
                     <Button variant="secondary" onClick={() => setShowAddModal(true)}>
                         Add New Friend
                     </Button>
@@ -131,27 +131,27 @@ export default function Friends() {
                     {filteredFriends.map(friendship => {
                         const friend = friendship.user_id === user.user_id ? friendship.friend : friendship.user;
                         return (
-                            <Card key={friendship.id} className="p-6 flex items-center justify-between group hover:border-primary/50 transition-all">
+                            <Card key={friendship.id} className="p-6 flex items-center justify-between group hover:border-primary/50 dark:hover:border-primary/50 transition-all">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-gradient-to-br from-teal-100 to-emerald-100 rounded-full flex items-center justify-center text-teal-700 font-bold text-xl">
                                         {friend.name.charAt(0).toUpperCase()}
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-gray-900">{friend.name}</h3>
-                                        <p className="text-sm text-gray-500">{friend.email}</p>
+                                        <h3 className="font-bold text-gray-900 dark:text-white">{friend.name}</h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">{friend.email}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => navigate(`/groups/null/add-expense?friend_id=${friend.user_id}`)}
-                                        className="p-2 text-gray-400 hover:text-primary hover:bg-indigo-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                        className="p-2 text-gray-400 hover:text-primary hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                                         title="Add Expense"
                                     >
                                         <DollarSign size={18} />
                                     </button>
                                     <button
                                         onClick={() => handleRemoveFriend(friend.user_id)}
-                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                                         title="Remove Friend"
                                     >
                                         <Trash2 size={18} />
@@ -166,8 +166,8 @@ export default function Friends() {
             {/* Add Friend Modal */}
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
-                        <h2 className="text-xl font-bold mb-4">Add Friend</h2>
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+                        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Add Friend</h2>
 
                         {error && (
                             <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
@@ -207,10 +207,10 @@ export default function Friends() {
 
                             <div className="relative py-2">
                                 <div className="absolute inset-0 flex items-center">
-                                    <div className="w-full border-t border-gray-200"></div>
+                                    <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
                                 </div>
                                 <div className="relative flex justify-center text-sm">
-                                    <span className="px-2 bg-white text-gray-500">Or if they are not on Splitly</span>
+                                    <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or if they are not on Splitly</span>
                                 </div>
                             </div>
 

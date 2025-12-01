@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Card, Button, Input } from '../components/ui';
-import { User, Lock, Bell, Mail, Globe, CreditCard, Palette, Settings as SettingsIcon } from 'lucide-react';
+import { User, Lock, Bell, Mail, Globe, CreditCard, Settings as SettingsIcon } from 'lucide-react';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
