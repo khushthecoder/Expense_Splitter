@@ -1,17 +1,23 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useStore } from './store/useStore';
-import Layout from './components/Layout';
-import ErrorBoundary from './components/ErrorBoundary';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import GroupDetail from './pages/GroupDetail';
-import AddExpense from './pages/AddExpense';
-import ManageGroup from './pages/ManageGroup';
-import Friends from './pages/Friends';
-import Settings from './pages/Settings';
-import Groups from './pages/Groups';
-import './index.css';
+import React, { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { useStore } from "./store/useStore";
+import Layout from "./components/Layout";
+import ErrorBoundary from "./components/ErrorBoundary";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import GroupDetail from "./pages/GroupDetail";
+import AddExpense from "./pages/AddExpense";
+import ManageGroup from "./pages/ManageGroup";
+import Friends from "./pages/Friends";
+import Settings from "./pages/Settings";
+import Groups from "./pages/Groups";
+import JoinGroup from "./pages/JoinGroup";
+import "./index.css";
 
 function ProtectedRoute({ children }) {
   const { user } = useStore();
@@ -23,11 +29,13 @@ function App() {
 
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
+    root.classList.remove("light", "dark");
 
     let effectiveTheme = theme;
-    if (theme !== 'light' && theme !== 'dark') {
-      effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    if (theme !== "light" && theme !== "dark") {
+      effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
       // Normalise the stored theme so future toggles are predictable
       setTheme(effectiveTheme);
     }
@@ -40,6 +48,7 @@ function App() {
       <ErrorBoundary>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/join-group/:id" element={<JoinGroup />} />
           <Route
             path="/"
             element={
