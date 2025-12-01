@@ -19,20 +19,21 @@ function ProtectedRoute({ children }) {
 }
 
 function App() {
-  const { theme } = useStore();
+  const { theme, setTheme } = useStore();
 
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
 
-    if (theme === 'system' || theme === 'auto') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      root.classList.add(systemTheme);
-      return;
+    let effectiveTheme = theme;
+    if (theme !== 'light' && theme !== 'dark') {
+      effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      // Normalise the stored theme so future toggles are predictable
+      setTheme(effectiveTheme);
     }
 
-    root.classList.add(theme);
-  }, [theme]);
+    root.classList.add(effectiveTheme);
+  }, [theme, setTheme]);
 
   return (
     <Router>
