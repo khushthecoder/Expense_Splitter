@@ -18,9 +18,14 @@ export default function Dashboard() {
     if (user) {
       fetchGroups();
       fetchActivity();
-      calculateBalances();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user && groups.length > 0) {
+      calculateBalances();
+    }
+  }, [user, groups]);
 
   const fetchActivity = async () => {
     try {
@@ -48,16 +53,18 @@ export default function Dashboard() {
       let totalOwing = 0;
 
       allExpenses.forEach(expense => {
-        const userSplit = expense.splits?.find(s => s.user_id === user.user_id);
-        if (!userSplit) return;
+        const isPayer = Number(expense.paid_by) === Number(user.user_id);
+        const userSplit = expense.splits?.find(s => Number(s.user_id) === Number(user.user_id));
 
-        const splitAmount = parseFloat(userSplit.share);
+        if (!isPayer && !userSplit) return; // Not involved at all
 
-        if (expense.paid_by === user.user_id) {
-          // User paid, others owe them
+        const splitAmount = userSplit ? parseFloat(userSplit.share) : 0;
+
+        if (isPayer) {
+          // User paid, others owe them (Total - User's Share)
           totalOwed += parseFloat(expense.amount) - splitAmount;
         } else {
-          // Someone else paid, user owes them
+          // Someone else paid, user owes their share
           totalOwing += splitAmount;
         }
       });
