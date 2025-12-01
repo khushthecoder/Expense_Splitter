@@ -12,8 +12,7 @@ import {
   Bell,
   ChevronDown,
   Sun,
-  Moon,
-  Monitor
+  Moon
 } from 'lucide-react';
 
 export default function Layout({ children }) {
@@ -28,6 +27,11 @@ export default function Layout({ children }) {
     navigate('/login');
   };
 
+  const toggleTheme = () => {
+    // Simple, predictable toggle between light and dark
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Users, label: 'My Groups', path: '/groups' },
@@ -36,15 +40,15 @@ export default function Layout({ children }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex transition-colors duration-200">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
       {/* Sidebar (Desktop) */}
-      <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 fixed h-full z-30">
-        <div className="p-6 border-b border-gray-50 dark:border-gray-800">
+      <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-100 dark:border-gray-700 fixed h-full z-30">
+        <div className="p-6 border-b border-gray-50 dark:border-gray-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-200 dark:shadow-none">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50">
               E
             </div>
-            <span className="font-bold text-xl text-gray-900 dark:text-white">Expense Splitter</span>
+            <span className="font-bold text-xl text-gray-900 dark:text-gray-100">Expense Splitter</span>
           </div>
         </div>
 
@@ -56,8 +60,8 @@ export default function Layout({ children }) {
               className={({ isActive }) => cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium",
                 isActive
-                  ? "bg-primary-light/50 text-primary dark:bg-primary/20"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                  ? "bg-primary-light/50 dark:bg-primary/20 text-primary dark:text-primary-light"
+                  : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
               )}
             >
               <item.icon size={20} />
@@ -66,31 +70,10 @@ export default function Layout({ children }) {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-gray-50 dark:border-gray-800 space-y-4">
-          {/* Theme Toggle */}
-          <div className="bg-gray-50 dark:bg-gray-800 p-1 rounded-xl flex items-center justify-between">
-            {['light', 'dark', 'auto'].map((t) => (
-              <button
-                key={t}
-                onClick={() => setTheme(t)}
-                className={cn(
-                  "p-2 rounded-lg transition-all duration-200 flex-1 flex justify-center",
-                  theme === t
-                    ? "bg-white dark:bg-gray-700 text-primary shadow-sm"
-                    : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                )}
-                title={t === 'auto' ? 'System Theme' : `${t.charAt(0).toUpperCase() + t.slice(1)} Mode`}
-              >
-                {t === 'light' && <Sun size={18} />}
-                {t === 'dark' && <Moon size={18} />}
-                {t === 'auto' && <Monitor size={18} />}
-              </button>
-            ))}
-          </div>
-
+        <div className="p-4 border-t border-gray-50 dark:border-gray-700">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 font-medium"
+            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-200 font-medium"
           >
             <LogOut size={20} />
             Logout
@@ -108,13 +91,13 @@ export default function Layout({ children }) {
 
       {/* Mobile Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-900 z-50 transform transition-transform duration-300 ease-in-out md:hidden",
+        "fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 z-50 transform transition-transform duration-300 ease-in-out md:hidden",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-6 flex justify-between items-center border-b border-gray-50 dark:border-gray-800">
-          <span className="font-bold text-xl text-gray-900 dark:text-white">Menu</span>
+        <div className="p-6 flex justify-between items-center border-b border-gray-50 dark:border-gray-700">
+          <span className="font-bold text-xl text-gray-900 dark:text-gray-100">Menu</span>
           <button onClick={() => setIsMobileMenuOpen(false)}>
-            <X size={24} className="text-gray-500" />
+            <X size={24} className="text-gray-500 dark:text-gray-400" />
           </button>
         </div>
         <nav className="p-4 space-y-2">
@@ -126,68 +109,56 @@ export default function Layout({ children }) {
               className={({ isActive }) => cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium",
                 isActive
-                  ? "bg-primary-light/50 text-primary dark:bg-primary/20"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                  ? "bg-primary-light/50 dark:bg-primary/20 text-primary dark:text-primary-light"
+                  : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
               )}
             >
               <item.icon size={20} />
               {item.label}
             </NavLink>
           ))}
-          <div className="mt-4 space-y-4">
-            <div className="bg-gray-50 dark:bg-gray-800 p-1 rounded-xl flex items-center justify-between">
-              {['light', 'dark', 'auto'].map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTheme(t)}
-                  className={cn(
-                    "p-2 rounded-lg transition-all duration-200 flex-1 flex justify-center",
-                    theme === t
-                      ? "bg-white dark:bg-gray-700 text-primary shadow-sm"
-                      : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                  )}
-                  title={t === 'auto' ? 'System Theme' : `${t.charAt(0).toUpperCase() + t.slice(1)} Mode`}
-                >
-                  {t === 'light' && <Sun size={18} />}
-                  {t === 'dark' && <Moon size={18} />}
-                  {t === 'auto' && <Monitor size={18} />}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 font-medium"
-            >
-              <LogOut size={20} />
-              Logout
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-200 font-medium mt-4"
+          >
+            <LogOut size={20} />
+            Logout
+          </button>
         </nav>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 md:ml-64 min-h-screen flex flex-col">
         {/* Top Navbar */}
-        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex justify-between items-center">
+        <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden p-2 text-gray-500 hover:bg-gray-50 rounded-lg"
+              className="md:hidden p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg"
             >
               <Menu size={24} />
             </button>
-            <h2 className="text-xl font-bold text-gray-800 dark:text-white hidden sm:block">
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 hidden sm:block">
               {navItems.find(i => i.path === location.pathname)?.label || 'Dashboard'}
             </h2>
           </div>
 
           <div className="flex items-center gap-6">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary-light transition-colors rounded-full hover:bg-indigo-50 dark:hover:bg-gray-700"
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
+            </button>
+
             {/* Notifications */}
             <div className="relative">
-              <button className="p-2 text-gray-400 hover:text-primary transition-colors rounded-full hover:bg-indigo-50 relative">
+              <button className="p-2 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary-light transition-colors rounded-full hover:bg-indigo-50 dark:hover:bg-gray-700 relative">
                 <Bell size={24} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 dark:bg-red-400 rounded-full border-2 border-white dark:border-gray-800" />
                 )}
               </button>
             </div>
@@ -196,15 +167,15 @@ export default function Layout({ children }) {
             <div className="relative">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center gap-3 hover:bg-gray-50 p-2 rounded-xl transition-colors"
+                className="flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-xl transition-colors"
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center text-primary font-bold">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 rounded-full flex items-center justify-center text-primary dark:text-primary-light font-bold">
                   {user?.name?.charAt(0).toUpperCase()}
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-200">{user?.name}</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{user?.name}</p>
                 </div>
-                <ChevronDown size={16} className="text-gray-400 hidden md:block" />
+                <ChevronDown size={16} className="text-gray-400 dark:text-gray-500 hidden md:block" />
               </button>
             </div>
           </div>
