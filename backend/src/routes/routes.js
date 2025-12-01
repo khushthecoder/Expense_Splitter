@@ -8,12 +8,14 @@ import {
   getGroups,
   createGroup,
   addMember,
+  removeMember,
   sendGroupInvitationEmail,
   sendFriendInvitationEmail,
   joinGroupViaInvitation,
   createExpense,
   getExpense,
   getGroupExpenses,
+  deleteExpense,
   createSettlement,
   userSettlements,
   groupSettlements,
@@ -32,6 +34,7 @@ router.get("/users/:id/activity", userActivity);
 router.get("/groups", getGroups);
 router.post("/groups", createGroup);
 router.post("/groups/:id/members", addMember);
+router.delete("/groups/:id/members/:userId", removeMember);
 router.post("/groups/:id/invite", sendGroupInvitationEmail);
 router.post("/groups/:group_id/join", joinGroupViaInvitation);
 router.post("/friends/invite", sendFriendInvitationEmail);
@@ -40,6 +43,7 @@ router.post("/friends/invite", sendFriendInvitationEmail);
 router.post("/expenses", createExpense);
 router.get("/expenses/:id", getExpense);
 router.get("/groups/:id/expenses", getGroupExpenses);
+router.delete("/expenses/:id", deleteExpense);
 
 // SETTLEMENTS
 router.post("/settlements", createSettlement);

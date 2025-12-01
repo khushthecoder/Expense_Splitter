@@ -1,126 +1,219 @@
-// src/store/useStore.js
 import { create } from 'zustand';
+import { authService, groupService, expenseService, settlementService } from '../services/api';
 
-const mockGroups = [
-  {
-    group_id: 1,
-    name: 'Goa Trip 2025',
-    description: 'Vacation with friends',
-    created_at: '2025-10-01',
-    members: [
-      { user_id: 101, name: 'Harsh Ahlawat' },
-      { user_id: 102, name: 'Priya Sharma' },
-      { user_id: 103, name: 'Aman Verma' }
-    ],
-    expenses: [
-      {
-        expense_id: 1,
-        description: 'Hotel Booking',
-        amount: 4500,
-        paid_by: 101,
-        paid_by_name: 'Harsh Ahlawat',
-        split: { '101': 1500, '102': 1500, '103': 1500 },
-        created_at: '2025-10-05'
-      },
-      {
-        expense_id: 2,
-        description: 'Dinner at Beach',
-        amount: 1800,
-        paid_by: 102,
-        paid_by_name: 'Priya Sharma',
-        split: { '101': 600, '102': 600, '103': 600 },
-        created_at: '2025-10-06'
-      }
-    ]
-  },
-  {
-    group_id: 2,
-    name: 'Roommates',
-    description: 'Flat 402, Sector 15',
-    created_at: '2025-09-01',
-    members: [
-      { user_id: 101, name: 'Harsh Ahlawat' },
-      { user_id: 104, name: 'Rohan Singh' }
-    ],
-    expenses: [
-      {
-        expense_id: 3,
-        description: 'Electricity Bill',
-        amount: 1200,
-        paid_by: 101,
-        paid_by_name: 'Harsh Ahlawat',
-        split: { '101': 600, '102': 600 },
-        created_at: '2025-10-10'
-      }
-    ]
-  }
-];
-
+// Helper to calculate balances from expenses
 const calculateBalances = (expenses) => {
   const bal = {};
   expenses.forEach(exp => {
-    const paidBy = exp.paid_by;
+    const paidBy = exp.paid_by || exp.payer?.user_id;
     const amount = parseFloat(exp.amount);
-    const split = exp.split || {};
+    
+    if (!bal[paidBy]) bal[paidBy] = 0;
+    bal[paidBy] += amount;
 
-    bal[paidBy] = (bal[paidBy] || 0) + amount;
-    Object.keys(split).forEach(user => {
-      const share = parseFloat(split[user] || 0);
-      bal[user] = (bal[user] || 0) - share;
-    });
+    if (exp.splits) {
+      exp.splits.forEach(split => {
+        const userId = split.user_id || split.user?.user_id;
+        const share = parseFloat(split.share);
+        if (!bal[userId]) bal[userId] = 0;
+        bal[userId] -= share;
+      });
+    }
   });
   return bal;
 };
 
 export const useStore = create((set, get) => ({
-  user: null,
+  user: JSON.parse(localStorage.getItem('user')) || null,
   groups: [],
   currentGroup: null,
   expenses: [],
   balances: {},
+  notifications: [],
+  loading: false,
+  error: null,
 
-  setUser: (user) => set({ user }),
+  setUser: (user) => {
+    localStorage.setItem('user', JSON.stringify(user));
+    set({ user });
+  },
 
   logout: () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
     set({ user: null, groups: [], currentGroup: null });
-    window.location.href = '/login';
   },
 
-  fetchGroups: () => {
-    set({ groups: mockGroups });
-  },
-
-  fetchGroup: (id) => {
-    const group = mockGroups.find(g => g.group_id === parseInt(id));
-    if (group) {
-      const balances = calculateBalances(group.expenses);
-      set({
-        currentGroup: group,
-        expenses: group.expenses,
-        balances
-      });
+  // Fetch all groups for the current user
+  fetchGroups: async () => {
+    const { user } = get();
+    if (!user) return;
+    set({ loading: true });
+    try {
+      const res = await groupService.getAll(user.user_id);
+      set({ groups: res.data, loading: false });
+    } catch (error) {
+      console.error("Failed to fetch groups", error);
+      set({ error: "Failed to fetch groups", loading: false });
     }
   },
 
-  addExpense: (expense) => {
-    const { currentGroup } = get();
-    const newExpense = {
-      ...expense,
-      expense_id: Date.now(),
-      paid_by_name: currentGroup.members.find(m => m.user_id === expense.paid_by)?.name || 'Unknown',
-      created_at: new Date().toISOString().split('T')[0]
-    };
+  // Fetch a single group details including members and expenses
+  fetchGroup: async (groupId) => {
+    set({ loading: true });
+    try {
+      const [groupRes, expensesRes, settlementsRes] = await Promise.all([
+        groupService.getById(groupId),
+        expenseService.getByGroup(groupId),
+        settlementService.getByGroup(groupId)
+      ]);
 
-    const updatedExpenses = [...currentGroup.expenses, newExpense];
-    const balances = calculateBalances(updatedExpenses);
+      const groupData = groupRes.data;
+      const expensesData = expensesRes.data;
+      const settlementsData = settlementsRes.data;
 
-    set({
-      expenses: updatedExpenses,
-      balances,
-      currentGroup: {
-        ...currentGroup,
-        expenses: updatedExpenses
-      }
-    });
+      const combinedExpenses = [
+        ...expensesData,
+        ...settlementsData.map(s => ({
+          expense_id: `settlement-${s.settlement_id}`,
+          description: 'Settlement',
+          amount: s.amount,
+          paid_by: s.paid_by,
+          is_settlement: true,
+          created_at: s.created_at,
+          splits: [{ user_id: s.paid_to, share: s.amount }]
+        }))
+      ];
+
+      const balances = calculateBalances(combinedExpenses);
+
+      const formattedExpenses = combinedExpenses.map(e => ({
+        ...e,
+        paid_by_name: groupData.members.find(m => m.user_id === (e.paid_by || e.payer?.user_id))?.user?.name || 'Unknown'
+      })).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      set({
+        currentGroup: groupData,
+        expenses: formattedExpenses,
+        balances,
+        loading: false
+      });
+    } catch (error) {
+      console.error("Failed to fetch group details", error);
+      set({ error: "Failed to fetch group details", loading: false });
+    }
   },
+
+  addExpense: async (expenseData) => {
+    set({ loading: true });
+    try {
+      const splits = Object.entries(expenseData.split).map(([userId, share]) => ({
+        user_id: parseInt(userId),
+        share: parseFloat(share)
+      }));
+
+      const payload = {
+        group_id: expenseData.group_id,
+        paid_by: expenseData.paid_by,
+        amount: expenseData.amount,
+        description: expenseData.description,
+        splits
+      };
+
+      await expenseService.create(payload);
+      
+      get().fetchGroup(expenseData.group_id);
+      get().addNotification(`New expense added: ${expenseData.description} ($${expenseData.amount})`);
+    } catch (error) {
+      console.error("Failed to add expense", error);
+      set({ loading: false });
+      throw error;
+    }
+  },
+
+  deleteExpense: async (expenseId) => {
+    const { currentGroup } = get();
+    if (!currentGroup) return;
+
+    try {
+      await expenseService.delete(expenseId);
+      get().fetchGroup(currentGroup.group_id);
+      get().addNotification("Expense deleted");
+    } catch (error) {
+      console.error("Failed to delete expense", error);
+    }
+  },
+
+  recordSettlement: async (data) => {
+    set({ loading: true });
+    try {
+      await settlementService.create({
+        group_id: data.group_id,
+        paid_by: data.payer,
+        paid_to: data.receiver,
+        amount: data.amount
+      });
+      
+      get().fetchGroup(data.group_id);
+      get().addNotification(`Settlement recorded: $${data.amount}`);
+    } catch (error) {
+      console.error("Failed to record settlement", error);
+      set({ loading: false });
+      throw error;
+    }
+  },
+
+  addMember: async (name) => {
+    const { currentGroup } = get();
+    if (!currentGroup) return;
+
+    try {
+      const randomSuffix = Date.now();
+      const newUserRes = await authService.signup({
+        name: name,
+        email: `${name.replace(/\s+/g, '').toLowerCase()}${randomSuffix}@example.com`,
+        phone: `${randomSuffix}`,
+        password: 'password'
+      });
+      const newUser = newUserRes.data;
+
+      await groupService.addMember(currentGroup.group_id, newUser.user_id);
+
+      get().fetchGroup(currentGroup.group_id);
+      get().addNotification(`${name} added to group`);
+    } catch (error) {
+      console.error("Failed to add member", error);
+    }
+  },
+
+  removeMember: async (userId) => {
+    const { currentGroup } = get();
+    if (!currentGroup) return;
+
+    try {
+      await groupService.removeMember(currentGroup.group_id, userId);
+      get().fetchGroup(currentGroup.group_id);
+      get().addNotification("Member removed");
+    } catch (error) {
+      console.error("Failed to remove member", error);
+    }
+  },
+
+  addNotification: (message) => {
+    const newNotification = {
+      id: Date.now(),
+      message,
+      time: new Date().toLocaleTimeString(),
+      read: false
+    };
+    set(state => ({
+      notifications: [newNotification, ...state.notifications]
+    }));
+  },
+
+  markNotificationsRead: () => {
+    set(state => ({
+      notifications: state.notifications.map(n => ({ ...n, read: true }))
+    }));
+  }
 }));

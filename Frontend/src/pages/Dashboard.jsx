@@ -1,65 +1,161 @@
-import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { Card, Button, Input } from '../components/ui';
+import { Plus, Search, Users, ArrowRight } from 'lucide-react';
+import { groupService } from '../services/api';
 
 export default function Dashboard() {
-  const { user, groups, fetchGroups, logout } = useStore();
+  const { user, groups, fetchGroups, loading } = useStore();
+  const navigate = useNavigate();
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [newGroupDesc, setNewGroupDesc] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    if (user) fetchGroups();
-  }, [user, fetchGroups]);
+    fetchGroups();
+  }, []);
+
+  const handleCreateGroup = async (e) => {
+    e.preventDefault();
+    if (!newGroupName.trim()) return;
+    try {
+      await groupService.create({
+        name: newGroupName,
+        description: newGroupDesc,
+        created_by: user.user_id
+      });
+      setShowCreateModal(false);
+      setNewGroupName('');
+      setNewGroupDesc('');
+      fetchGroups();
+    } catch (error) {
+      console.error("Failed to create group", error);
+    }
+  };
+
+  const filteredGroups = groups.filter(g => 
+    g.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="min-h-screen">
-      <header className="header">
-        <div className="container dashboard-header">
-          <h1 className="text-xl font-bold text-green-600">💸 Expense Splitter</h1>
-          <div className="flex gap-4 items-center">
-            <span className="text-gray-600">{user?.name}</span>
-            <button 
-              onClick={logout} 
-              className="text-red-600 text-sm hover:underline"
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">My Groups</h1>
+          <p className="text-gray-500">Manage your shared expenses</p>
+        </div>
+        <Button onClick={() => setShowCreateModal(true)} className="gap-2">
+          <Plus size={20} />
+          Create Group
+        </Button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+        <input
+          type="text"
+          placeholder="Search groups..."
+          className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {/* Groups Grid */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
+          ))}
+        </div>
+      ) : filteredGroups.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 border-dashed">
+          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Users size={32} className="text-gray-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">No groups found</h3>
+          <p className="text-gray-500 mb-6">Create a new group to start splitting expenses</p>
+          <Button variant="secondary" onClick={() => setShowCreateModal(true)}>
+            Create New Group
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredGroups.map(group => (
+            <Card 
+              key={group.group_id} 
+              className="p-6 cursor-pointer group hover:border-primary/50"
+              onClick={() => navigate(`/groups/${group.group_id}`)}
             >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="dashboard-main">
-        <div className="container">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">Your Groups</h2>
-            <Link to="/groups/new" className="btn btn-primary">
-              + New Group
-            </Link>
-          </div>
-
-          {groups.length === 0 ? (
-            <div className="text-center mt-8">
-              <p className="text-gray-500 text-lg">
-                No groups yet. Create your first group!
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center text-primary font-bold text-xl">
+                  {group.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="bg-gray-50 px-3 py-1 rounded-full text-xs font-medium text-gray-600 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                  View Details
+                </div>
+              </div>
+              
+              <h3 className="text-lg font-bold text-gray-900 mb-1">{group.name}</h3>
+              <p className="text-sm text-gray-500 line-clamp-2 mb-4 h-10">
+                {group.description || 'No description'}
               </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3">
-              {groups.map((group) => (
-                <Link
-                  key={group.group_id}
-                  to={`/groups/${group.group_id}`}
-                  className="group-card"
-                >
-                  <h3>{group.name}</h3>
-                  <p>{group.description}</p>
-                  <p className="text-gray-500 text-sm">
-                    Created {new Date(group.created_at).toLocaleDateString()}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          )}
+
+              <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                <div className="flex items-center gap-2 text-gray-500 text-sm">
+                  <Users size={16} />
+                  <span>{group.members?.length || 0} members</span>
+                </div>
+                <ArrowRight size={16} className="text-gray-300 group-hover:text-primary transition-colors transform group-hover:translate-x-1" />
+              </div>
+            </Card>
+          ))}
         </div>
-      </main>
+      )}
+
+      {/* Create Group Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+            <h2 className="text-xl font-bold mb-4">Create New Group</h2>
+            <form onSubmit={handleCreateGroup} className="space-y-4">
+              <Input
+                label="Group Name"
+                placeholder="e.g. Trip to Goa"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                required
+              />
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <textarea
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary-light/20 outline-none transition-all resize-none h-24"
+                  placeholder="What's this group for?"
+                  value={newGroupDesc}
+                  onChange={(e) => setNewGroupDesc(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button 
+                  type="button" 
+                  variant="secondary" 
+                  className="flex-1"
+                  onClick={() => setShowCreateModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="flex-1">
+                  Create Group
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

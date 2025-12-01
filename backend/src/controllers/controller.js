@@ -121,6 +121,18 @@ export const addMember = async (req, res) => {
   res.status(201).json(member);
 };
 
+export const removeMember = async (req, res) => {
+  const groupId = Number(req.params.id);
+  const userId = Number(req.params.userId);
+
+  try {
+    await Service.removeGroupMember(groupId, userId);
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: "Failed to remove member" });
+  }
+};
+
 // Send group invitation via email
 export const sendGroupInvitationEmail = async (req, res) => {
   try {
@@ -291,6 +303,16 @@ export const getGroupExpenses = async (req, res) => {
   const id = Number(req.params.id);
   const expenses = await Service.getExpensesByGroup(id);
   res.json(expenses);
+};
+
+export const deleteExpense = async (req, res) => {
+  const id = Number(req.params.id);
+  try {
+    await Service.deleteExpense(id);
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete expense" });
+  }
 };
 
 // SETTLEMENTS

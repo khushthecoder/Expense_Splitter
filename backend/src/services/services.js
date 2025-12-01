@@ -62,6 +62,11 @@ const Service = {
       where: { group_id, user_id }
     }),
 
+  removeGroupMember: (group_id, user_id) =>
+    prisma.groupMember.deleteMany({
+      where: { group_id, user_id }
+    }),
+
   findGroupMemberByEmail: async (group_id, email) => {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return null;
@@ -109,6 +114,11 @@ const Service = {
         }
       },
       orderBy: { created_at: "desc" }
+    }),
+
+  deleteExpense: (id) =>
+    prisma.expense.delete({
+      where: { expense_id: id }
     }),
 
 //SETTLEMENTS
