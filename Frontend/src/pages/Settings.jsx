@@ -133,18 +133,18 @@ export default function Settings() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-                <p className="text-gray-500">Manage your account settings and preferences</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
+                <p className="text-gray-500 dark:text-gray-400">Manage your account settings and preferences</p>
             </div>
 
             {success && (
-                <div className="p-3 bg-green-50 text-green-600 rounded-lg text-sm">
+                <div className="p-3 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg text-sm">
                     {success}
                 </div>
             )}
 
             {error && (
-                <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                <div className="p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-sm">
                     {error}
                 </div>
             )}
@@ -159,7 +159,7 @@ export default function Settings() {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === tab.id
                                     ? 'bg-primary text-white'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                                     }`}
                             >
                                 <tab.icon size={20} />
@@ -175,8 +175,8 @@ export default function Settings() {
                         {activeTab === 'profile' && (
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-xl font-bold text-gray-900 mb-2">Core Profile</h2>
-                                    <p className="text-gray-500 text-sm">Update your personal information</p>
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Core Profile</h2>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Update your personal information</p>
                                 </div>
 
                                 <form onSubmit={handleProfileUpdate} className="space-y-4">
@@ -211,8 +211,8 @@ export default function Settings() {
                         {activeTab === 'security' && (
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-xl font-bold text-gray-900 mb-2">Account & Security</h2>
-                                    <p className="text-gray-500 text-sm">Manage your password and security settings</p>
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Account & Security</h2>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Manage your password and security settings</p>
                                 </div>
 
                                 <form onSubmit={handlePasswordUpdate} className="space-y-4">
@@ -248,15 +248,15 @@ export default function Settings() {
                         {activeTab === 'notifications' && (
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-xl font-bold text-gray-900 mb-2">Notification Settings</h2>
-                                    <p className="text-gray-500 text-sm">Control how you receive notifications</p>
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Notification Settings</h2>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Control how you receive notifications</p>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                         <div>
-                                            <h3 className="font-medium text-gray-900">Push Notifications</h3>
-                                            <p className="text-sm text-gray-500">Receive push notifications for updates</p>
+                                            <h3 className="font-medium text-gray-900 dark:text-gray-100">Push Notifications</h3>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">Receive push notifications for updates</p>
                                         </div>
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input
@@ -269,10 +269,10 @@ export default function Settings() {
                                         </label>
                                     </div>
 
-                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                         <div>
-                                            <h3 className="font-medium text-gray-900">Email Notifications</h3>
-                                            <p className="text-sm text-gray-500">Receive email updates and summaries</p>
+                                            <h3 className="font-medium text-gray-900 dark:text-gray-100">Email Notifications</h3>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">Receive email updates and summaries</p>
                                         </div>
                                         <label className="relative inline-flex items-center cursor-pointer">
                                             <input
@@ -292,21 +292,22 @@ export default function Settings() {
                             <div className="space-y-8">
                                 {/* Theme */}
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                                         <Palette size={20} />
                                         Theme
                                     </h3>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        {['light', 'dark', 'auto'].map(themeOption => (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {['light', 'dark'].map(themeOption => (
                                             <button
                                                 key={themeOption}
                                                 onClick={() => handleSettingsUpdate({ theme: themeOption })}
-                                                className={`p-4 rounded-lg border-2 transition-all capitalize ${theme === themeOption
-                                                    ? 'border-primary bg-primary/10'
-                                                    : 'border-gray-200 hover:border-gray-300'
-                                                    }`}
+                                                className={`p-4 rounded-lg border-2 transition-all capitalize ${
+                                                    theme === themeOption
+                                                        ? 'border-primary bg-primary/10 dark:bg-primary/20'
+                                                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                                                }`}
                                             >
-                                                {theme}
+                                                {themeOption}
                                             </button>
                                         ))}
                                     </div>
@@ -314,17 +315,17 @@ export default function Settings() {
 
                                 {/* Language & Region */}
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                                         <Globe size={20} />
                                         Language & Region
                                     </h3>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Language</label>
                                             <select
                                                 value={settings.language}
                                                 onChange={(e) => handleSettingsUpdate({ language: e.target.value })}
-                                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-primary outline-none"
+                                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:border-primary outline-none"
                                             >
                                                 <option value="en">English</option>
                                                 <option value="es">Spanish</option>
@@ -332,11 +333,11 @@ export default function Settings() {
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Currency</label>
                                             <select
                                                 value={settings.currency}
                                                 onChange={(e) => handleSettingsUpdate({ currency: e.target.value })}
-                                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-primary outline-none"
+                                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:border-primary outline-none"
                                             >
                                                 <option value="USD">USD ($)</option>
                                                 <option value="EUR">EUR (€)</option>
@@ -349,17 +350,17 @@ export default function Settings() {
 
                                 {/* Expense Defaults */}
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                                         <CreditCard size={20} />
                                         Expense Defaults
                                     </h3>
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Default Split Mode</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Split Mode</label>
                                             <select
                                                 value={settings.default_split_mode}
                                                 onChange={(e) => handleSettingsUpdate({ default_split_mode: e.target.value })}
-                                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-primary outline-none"
+                                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:border-primary outline-none"
                                             >
                                                 <option value="equal">Equal</option>
                                                 <option value="percentage">Percentage</option>
@@ -368,25 +369,25 @@ export default function Settings() {
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Default Category</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Category</label>
                                             <input
                                                 type="text"
                                                 value={settings.default_category || ''}
                                                 onChange={(e) => setSettings({ ...settings, default_category: e.target.value })}
                                                 onBlur={() => handleSettingsUpdate({ default_category: settings.default_category })}
                                                 placeholder="e.g., Food, Travel"
-                                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-primary outline-none"
+                                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:border-primary outline-none"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Default Payment Method</label>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Payment Method</label>
                                             <input
                                                 type="text"
                                                 value={settings.default_payment_method || ''}
                                                 onChange={(e) => setSettings({ ...settings, default_payment_method: e.target.value })}
                                                 onBlur={() => handleSettingsUpdate({ default_payment_method: settings.default_payment_method })}
                                                 placeholder="e.g., Cash, Card"
-                                                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-primary outline-none"
+                                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:border-primary outline-none"
                                             />
                                         </div>
                                     </div>

@@ -25,7 +25,14 @@ const calculateBalances = (expenses) => {
 
 export const useStore = create((set, get) => ({
   user: JSON.parse(localStorage.getItem('user')) || null,
-  theme: localStorage.getItem('theme') || 'auto',
+  theme: (() => {
+    const stored = localStorage.getItem('theme');
+    if (stored === 'light' || stored === 'dark') return stored;
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
+  })(),
   groups: [],
   currentGroup: null,
   expenses: [],
