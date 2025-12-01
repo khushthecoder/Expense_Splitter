@@ -11,7 +11,7 @@ model User {
   user_id             Int            @id @default(autoincrement())
   name                String
   email               String         @unique
-  phone               String         @unique
+  phone               String?        @unique
   created_at          DateTime       @default(now())
   expenses            Expense[]      @relation("PaidBy")
   splits              ExpenseSplit[]
