@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -40,7 +40,7 @@ model UserSettings {
   updated_at            DateTime @updatedAt
   user                  User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
-  @@index([user_id], map: "UserSettings_user_id_fkey")
+  @@index([user_id], map: "UserSettings_user_id_idx")
 }
 
 model Friend {
@@ -53,8 +53,8 @@ model Friend {
   friend    User     @relation("FriendUsers", fields: [friend_id], references: [user_id])
 
   @@unique([user_id, friend_id])
-  @@index([user_id], map: "Friend_user_id_fkey")
-  @@index([friend_id], map: "Friend_friend_id_fkey")
+  @@index([user_id], map: "Friend_user_id_idx")
+  @@index([friend_id], map: "Friend_friend_id_idx")
 }
 
 model Group {
@@ -76,8 +76,8 @@ model GroupMember {
   group     Group    @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
   user      User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
-  @@index([group_id], map: "GroupMember_group_id_fkey")
-  @@index([user_id], map: "GroupMember_user_id_fkey")
+  @@index([group_id], map: "GroupMember_group_id_idx")
+  @@index([user_id], map: "GroupMember_user_id_idx")
 }
 
 model Expense {
@@ -91,8 +91,8 @@ model Expense {
   payer       User?          @relation("PaidBy", fields: [paid_by], references: [user_id])
   splits      ExpenseSplit[]
 
-  @@index([group_id], map: "Expense_group_id_fkey")
-  @@index([paid_by], map: "Expense_paid_by_fkey")
+  @@index([group_id], map: "Expense_group_id_idx")
+  @@index([paid_by], map: "Expense_paid_by_idx")
 }
 
 model ExpenseSplit {
@@ -103,8 +103,8 @@ model ExpenseSplit {
   expense    Expense @relation(fields: [expense_id], references: [expense_id])
   user       User    @relation(fields: [user_id], references: [user_id])
 
-  @@index([expense_id], map: "ExpenseSplit_expense_id_fkey")
-  @@index([user_id], map: "ExpenseSplit_user_id_fkey")
+  @@index([expense_id], map: "ExpenseSplit_expense_id_idx")
+  @@index([user_id], map: "ExpenseSplit_user_id_idx")
 }
 
 model Settlement {
@@ -118,7 +118,7 @@ model Settlement {
   payer         User?    @relation("SettlementsPaid", fields: [paid_by], references: [user_id])
   receiver      User?    @relation("SettlementsReceived", fields: [paid_to], references: [user_id])
 
-  @@index([group_id], map: "Settlement_group_id_fkey")
-  @@index([paid_by], map: "Settlement_paid_by_fkey")
-  @@index([paid_to], map: "Settlement_paid_to_fkey")
+  @@index([group_id], map: "Settlement_group_id_idx")
+  @@index([paid_by], map: "Settlement_paid_by_idx")
+  @@index([paid_to], map: "Settlement_paid_to_idx")
 }
