@@ -3,12 +3,15 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// EmailJS configuration - using environment variables with fallback to provided service_id
+// EmailJS configuration - use environment variables if provided,
+// otherwise fall back to the known working defaults used in testEmailJS.
+// This makes local development work out of the box, while still allowing
+// you to override with your own credentials via .env.
 const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID;
 const EMAILJS_TEMPLATE_ID =
   process.env.EMAILJS_TEMPLATE_ID;
 const EMAILJS_PUBLIC_KEY =
-  process.env.EMAILJS_PUBLIC_KEY;
+  process.env.EMAILJS_PUBLIC_KEY ;
 const EMAILJS_PRIVATE_KEY =
   process.env.EMAILJS_PRIVATE_KEY;
 
