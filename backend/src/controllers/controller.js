@@ -413,7 +413,10 @@ export const sendGroupInvitationEmail = async (req, res) => {
     }
 
     // Generate invitation link
-    const baseUrl = process.env.FRONTEND_URL || "http://localhost:8081";
+    // During local development we want links to open the Vite dev server
+    // running on http://localhost:5173. When you deploy, set FRONTEND_URL
+    // in your .env file to your real frontend URL.
+    const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     const invitationLink = `${baseUrl}/join-group/${groupId}?email=${encodeURIComponent(
       recipient_email
     )}`;
@@ -469,7 +472,7 @@ export const sendFriendInvitationEmail = async (req, res) => {
       return res.status(400).json({ error: "Invalid email address format" });
     }
 
-    const baseUrl = process.env.FRONTEND_URL || "http://localhost:8081";
+    const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     const invitationLink = `${baseUrl}/signup?email=${encodeURIComponent(
       recipient_email
     )}`;
@@ -660,7 +663,7 @@ export const testEmailJS = async (req, res) => {
       process.env.EMAILJS_PUBLIC_KEY || "mJ3qmBZCtXLrJ00Lt";
     const EMAILJS_PRIVATE_KEY =
       process.env.EMAILJS_PRIVATE_KEY || "uwW92Tmu7q1rlfa9QGHKG";
-    const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:8081";
+    const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
     const configStatus = {
       EMAILJS_SERVICE_ID: EMAILJS_SERVICE_ID ? "✅ Set" : "❌ Missing",
