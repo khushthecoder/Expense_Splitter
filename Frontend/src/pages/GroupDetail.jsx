@@ -4,6 +4,8 @@ import { useStore } from '../store/useStore';
 import { Card, Button, Badge } from '../components/ui';
 import Analytics from '../components/Analytics';
 import SettlementModal from '../components/SettlementModal';
+import InvitationModal from '../components/InvitationModal';
+import Toast from '../components/ui/Toast';
 import {
   Plus,
   Settings,
@@ -11,7 +13,8 @@ import {
   Receipt,
   BarChart3,
   Wallet,
-  ArrowRightLeft
+  ArrowRightLeft,
+  UserPlus
 } from 'lucide-react';
 
 export default function GroupDetail() {
@@ -20,6 +23,8 @@ export default function GroupDetail() {
   const { currentGroup, expenses, balances, fetchGroup, deleteExpense, loading } = useStore();
   const [activeTab, setActiveTab] = useState('expenses');
   const [isSettlementModalOpen, setIsSettlementModalOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     fetchGroup(id);
@@ -74,6 +79,10 @@ export default function GroupDetail() {
           <Button variant="secondary" onClick={() => navigate(`/groups/${id}/manage`)}>
             <Settings size={18} className="mr-2" />
             Manage
+          </Button>
+          <Button variant="secondary" onClick={() => setIsInviteModalOpen(true)}>
+            <UserPlus size={18} className="mr-2" />
+            Invite
           </Button>
           <Button onClick={() => navigate(`/groups/${id}/add-expense`)}>
             <Plus size={18} className="mr-2" />
@@ -213,6 +222,22 @@ export default function GroupDetail() {
         onClose={() => setIsSettlementModalOpen(false)}
         group={currentGroup}
       />
+
+      <InvitationModal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        group={currentGroup}
+        onSuccess={(email) => setToast({ message: `Invitation sent successfully to ${email}!`, type: 'success' })}
+        onError={(message) => setToast({ message, type: 'error' })}
+      />
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }
