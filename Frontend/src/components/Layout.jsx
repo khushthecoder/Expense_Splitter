@@ -16,7 +16,14 @@ import {
 } from 'lucide-react';
 
 export default function Layout({ children }) {
-  const { user, logout, notifications, unreadCount, theme, setTheme } = useStore();
+  // Use selective selectors to prevent unnecessary re-renders
+  const user = useStore((state) => state.user);
+  const logout = useStore((state) => state.logout);
+  const notifications = useStore((state) => state.notifications);
+  const unreadCount = useStore((state) => state.notifications.filter(n => !n.read).length);
+  const theme = useStore((state) => state.theme);
+  const setTheme = useStore((state) => state.setTheme);
+
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -177,8 +184,41 @@ export default function Layout({ children }) {
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{user?.name}</p>
                 </div>
-
+                <ChevronDown size={16} className="text-gray-400 hidden md:block" />
               </button>
+
+              {/* Dropdown Menu */}
+              {isProfileOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setIsProfileOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 py-2 z-20">
+                    <button
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        navigate('/settings');
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                    >
+                      <Settings size={16} />
+                      Settings
+                    </button>
+                    <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
+                    <button
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center gap-2"
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>

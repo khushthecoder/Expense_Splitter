@@ -10,7 +10,14 @@ export default function AddExpense() {
   const [searchParams] = useSearchParams();
   const friendId = searchParams.get('friend_id');
   const navigate = useNavigate();
-  const { currentGroup, fetchGroup, addExpense, loading, user, error } = useStore();
+
+  // Use selective selectors to prevent unnecessary re-renders
+  const currentGroup = useStore((state) => state.currentGroup);
+  const fetchGroup = useStore((state) => state.fetchGroup);
+  const addExpense = useStore((state) => state.addExpense);
+  const loading = useStore((state) => state.loading);
+  const error = useStore((state) => state.error);
+  const userId = useStore((state) => state.user?.user_id);
 
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -32,19 +39,19 @@ export default function AddExpense() {
         if (!currentGroup || currentGroup.group_id !== parseInt(id)) {
           await fetchGroup(id);
         }
-      } else if (friendId) {
+      } else if (friendId && userId) {
         // Load friend details
         try {
-          const res = await friendService.getAll(user.user_id);
+          const res = await friendService.getAll(userId);
           const friend = res.data.find(f =>
-            (f.user_id === user.user_id && f.friend_id === parseInt(friendId)) ||
-            (f.friend_id === user.user_id && f.user_id === parseInt(friendId))
+            (f.user_id === userId && f.friend_id === parseInt(friendId)) ||
+            (f.friend_id === userId && f.user_id === parseInt(friendId))
           );
 
           if (friend) {
-            const friendUser = friend.user_id === user.user_id ? friend.friend : friend.user;
+            const friendUser = friend.user_id === userId ? friend.friend : friend.user;
             setMembers([
-              { user_id: user.user_id, name: 'You' },
+              { user_id: userId, name: 'You' },
               { user_id: friendUser.user_id, name: friendUser.name }
             ]);
           }
@@ -54,7 +61,7 @@ export default function AddExpense() {
       }
     };
     loadData();
-  }, [id, friendId, user]);
+  }, [id, friendId, userId, currentGroup, fetchGroup, navigate]);
 
   useEffect(() => {
     if (currentGroup && id) {
@@ -63,8 +70,8 @@ export default function AddExpense() {
   }, [currentGroup, id]);
 
   useEffect(() => {
-    if (members.length > 0 && !paidBy) {
-      setPaidBy(user.user_id);
+    if (members.length > 0 && !paidBy && userId) {
+      setPaidBy(userId);
 
       // Initialize splits
       const initialSplits = {};
@@ -81,7 +88,7 @@ export default function AddExpense() {
       setShares(initialShares);
       setPercentages(initialPercentages);
     }
-  }, [members, paidBy, user]);
+  }, [members.length, paidBy, userId]);
 
   const handleAmountChange = (val) => {
     setAmount(val);
@@ -203,7 +210,7 @@ export default function AddExpense() {
       </Button>
 
       <Card className="p-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Add New Expense</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Add New Expense</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <Input
@@ -216,13 +223,13 @@ export default function AddExpense() {
           />
 
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-gray-700">Amount</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
             <div className="relative">
               <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="number"
                 step="0.01"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary-light/20 outline-none transition-all text-lg font-semibold"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700 focus:border-primary focus:ring-4 focus:ring-primary-light/20 dark:focus:ring-primary/30 outline-none transition-all text-lg font-semibold"
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => handleAmountChange(e.target.value)}
@@ -232,9 +239,9 @@ export default function AddExpense() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-gray-700">Paid By</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Paid By</label>
             <select
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary-light/20 outline-none transition-all appearance-none"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700 focus:border-primary focus:ring-4 focus:ring-primary-light/20 dark:focus:ring-primary/30 outline-none transition-all appearance-none"
               value={paidBy}
               onChange={(e) => setPaidBy(e.target.value)}
             >
@@ -247,8 +254,8 @@ export default function AddExpense() {
           </div>
 
           <div className="space-y-4 pt-4 border-t border-gray-100">
-            <label className="block text-sm font-medium text-gray-700">Split Method</label>
-            <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Split Method</label>
+            <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
               {['equal', 'unequal', 'percentage', 'shares'].map(type => (
                 <button
                   key={type}
@@ -270,7 +277,7 @@ export default function AddExpense() {
                   <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sm font-bold text-gray-600 border border-gray-200">
                     {member.name.charAt(0).toUpperCase()}
                   </div>
-                  <span className="flex-1 text-sm font-medium text-gray-700">{member.name}</span>
+                  <span className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300">{member.name}</span>
 
                   {splitType === 'equal' && (
                     <span className="text-gray-500 font-medium">

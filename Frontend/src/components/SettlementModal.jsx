@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 
 export default function SettlementModal({ isOpen, onClose, group }) {
-  const { recordSettlement, balances } = useStore();
+  // Use selective selectors to prevent unnecessary re-renders
+  const recordSettlement = useStore((state) => state.recordSettlement);
+  const balances = useStore((state) => state.balances);
+
   const [payer, setPayer] = useState('');
   const [receiver, setReceiver] = useState('');
   const [amount, setAmount] = useState('');

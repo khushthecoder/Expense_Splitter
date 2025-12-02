@@ -7,7 +7,13 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export default function Settings() {
-    const { user, setUser, theme, setTheme } = useStore();
+    // Use selective selectors to prevent unnecessary re-renders
+    const user = useStore((state) => state.user);
+    const setUser = useStore((state) => state.setUser);
+    const theme = useStore((state) => state.theme);
+    const setTheme = useStore((state) => state.setTheme);
+    const userId = useStore((state) => state.user?.user_id);
+
     const [activeTab, setActiveTab] = useState('profile');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
@@ -36,7 +42,7 @@ export default function Settings() {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.put(
-                `${API_URL}/users/${user.user_id}/profile`,
+                `${API_URL}/users/${userId}/profile`,
                 profileData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -64,7 +70,7 @@ export default function Settings() {
         try {
             const token = localStorage.getItem('token');
             await axios.put(
-                `${API_URL}/users/${user.user_id}/password`,
+                `${API_URL}/users/${userId}/password`,
                 {
                     currentPassword: passwordData.currentPassword,
                     newPassword: passwordData.newPassword

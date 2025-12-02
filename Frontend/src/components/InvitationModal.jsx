@@ -5,7 +5,9 @@ import { useStore } from '../store/useStore';
 import { Button, Input } from './ui';
 
 export default function InvitationModal({ isOpen, onClose, group, onSuccess, onError }) {
-    const { user } = useStore();
+    // Use selective selector to prevent unnecessary re-renders
+    const user = useStore((state) => state.user);
+
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [validationError, setValidationError] = useState('');

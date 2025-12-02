@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { Card, Button, Badge } from '../components/ui';
@@ -28,11 +28,7 @@ export default function GroupDetail() {
 
   useEffect(() => {
     fetchGroup(id);
-    const interval = setInterval(() => {
-      fetchGroup(id);
-    }, 5000);
-
-    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   if (loading || !currentGroup) {
@@ -72,7 +68,7 @@ export default function GroupDetail() {
       {/* Group Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{currentGroup.name}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{currentGroup.name}</h1>
           <p className="text-gray-500">{currentGroup.description || 'No description'}</p>
         </div>
         <div className="flex gap-3">
@@ -99,7 +95,7 @@ export default function GroupDetail() {
         </Card>
         <Card className="p-6">
           <p className="text-gray-500 font-medium mb-1">Members</p>
-          <h3 className="text-3xl font-bold text-gray-900">{currentGroup.members.length}</h3>
+          <h3 className="text-3xl font-bold text-gray-900 dark:text-white">{currentGroup.members.length}</h3>
         </Card>
         <Card className="p-6">
           <p className="text-gray-500 font-medium mb-1">Your Balance</p>
@@ -153,7 +149,7 @@ export default function GroupDetail() {
                       {expense.is_settlement ? '🤝' : '🧾'}
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900">{expense.description}</h4>
+                      <h4 className="font-bold text-gray-900 dark:text-white">{expense.description}</h4>
                       <p className="text-sm text-gray-500">
                         {expense.is_settlement ? 'Settlement' : `Paid by ${expense.paid_by_name}`} • {new Date(expense.created_at).toLocaleDateString()}
                       </p>
@@ -161,7 +157,7 @@ export default function GroupDetail() {
                   </div>
                   <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
                     <div className="text-right">
-                      <p className="font-bold text-lg text-gray-900">${parseFloat(expense.amount).toFixed(2)}</p>
+                      <p className="font-bold text-lg text-gray-900 dark:text-white">${parseFloat(expense.amount).toFixed(2)}</p>
                       {!expense.is_settlement && (
                         <p className="text-xs text-gray-400">
                           Split between {expense.splits?.length || 0} people
@@ -184,7 +180,7 @@ export default function GroupDetail() {
         {activeTab === 'balances' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-gray-900">Net Balances</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Net Balances</h3>
               <Button onClick={() => setIsSettlementModalOpen(true)} className="gap-2">
                 <ArrowRightLeft size={18} />
                 Settle Up
@@ -200,7 +196,7 @@ export default function GroupDetail() {
                       <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-600">
                         {member.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="font-medium text-gray-900">{member.name}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{member.name}</span>
                     </div>
                     <Badge variant={balance > 0 ? 'success' : balance < 0 ? 'danger' : 'default'}>
                       {balance > 0 ? 'gets back' : balance < 0 ? 'owes' : 'settled'} ${Math.abs(balance).toFixed(2)}

@@ -67,7 +67,7 @@ export default function Login() {
           <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg shadow-indigo-200 mx-auto mb-4">
             E
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h1>
           <p className="text-gray-500">
