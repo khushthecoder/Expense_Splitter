@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { Card, Button } from '../components/ui';
@@ -8,38 +8,34 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export default function Dashboard() {
-  const { user, groups, fetchGroups, loading } = useStore();
+  // Use selective selectors to prevent unnecessary re-renders
+  // ONLY subscribe to primitives, NOT the user object
+  const userName = useStore((state) => state.user?.name);
+  const groups = useStore((state) => state.groups);
+  const fetchGroups = useStore((state) => state.fetchGroups);
+  const loading = useStore((state) => state.loading);
+  const userId = useStore((state) => state.user?.user_id);
+
   const navigate = useNavigate();
   const [activity, setActivity] = useState([]);
   const [balances, setBalances] = useState({ youOwe: 0, youAreOwed: 0 });
   const [loadingActivity, setLoadingActivity] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchGroups();
-      fetchActivity();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user && groups.length > 0) {
-      calculateBalances();
-    }
-  }, [user, groups]);
-
-  const fetchActivity = async () => {
+  const fetchActivity = useCallback(async () => {
+    if (!userId) return;
     try {
       setLoadingActivity(true);
-      const res = await axios.get(`${API_URL}/users/${user.user_id}/activity`);
+      const res = await axios.get(`${API_URL} /users/${userId}/activity`);
       setActivity(res.data.slice(0, 10)); // Show latest 10 activities
     } catch (err) {
       console.error('Failed to fetch activity', err);
     } finally {
       setLoadingActivity(false);
     }
-  };
+  }, [userId]);
 
-  const calculateBalances = async () => {
+  const calculateBalances = useCallback(async () => {
+    if (!userId) return;
     try {
       // Fetch all expenses where user is involved
       const groupExpensesPromises = groups.map(g =>
@@ -53,8 +49,8 @@ export default function Dashboard() {
       let totalOwing = 0;
 
       allExpenses.forEach(expense => {
-        const isPayer = Number(expense.paid_by) === Number(user.user_id);
-        const userSplit = expense.splits?.find(s => Number(s.user_id) === Number(user.user_id));
+        const isPayer = Number(expense.paid_by) === Number(userId);
+        const userSplit = expense.splits?.find(s => Number(s.user_id) === Number(userId));
 
         if (!isPayer && !userSplit) return; // Not involved at all
 
@@ -73,7 +69,20 @@ export default function Dashboard() {
     } catch (err) {
       console.error('Failed to calculate balances', err);
     }
-  };
+  }, [userId, groups]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchGroups();
+      fetchActivity();
+    }
+  }, [userId, fetchGroups, fetchActivity]);
+
+  useEffect(() => {
+    if (userId && groups.length > 0) {
+      calculateBalances();
+    }
+  }, [userId, groups, calculateBalances]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -103,7 +112,7 @@ export default function Dashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="text-gray-500 dark:text-gray-400">Welcome back, {user?.name}!</p>
+          <p className="text-gray-500 dark:text-gray-400">Welcome back, {userName}!</p>
         </div>
         <div className="flex gap-3">
           <Button

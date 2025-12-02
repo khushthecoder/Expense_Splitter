@@ -6,7 +6,13 @@ import { Plus, Search, Users, ArrowRight, DollarSign, CheckCircle } from 'lucide
 import { groupService } from '../services/api';
 
 export default function Groups() {
-    const { user, groups, fetchGroups, loading } = useStore();
+    // Use selective selectors to prevent unnecessary re-renders
+    const user = useStore((state) => state.user);
+    const groups = useStore((state) => state.groups);
+    const fetchGroups = useStore((state) => state.fetchGroups);
+    const loading = useStore((state) => state.loading);
+    const userId = useStore((state) => state.user?.user_id);
+
     const navigate = useNavigate();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newGroupName, setNewGroupName] = useState('');
@@ -17,7 +23,7 @@ export default function Groups() {
 
     useEffect(() => {
         fetchGroups();
-    }, []);
+    }, [fetchGroups]);
 
     const handleCreateGroup = async (e) => {
         e.preventDefault();
@@ -37,7 +43,7 @@ export default function Groups() {
             await groupService.create({
                 name: newGroupName.trim(),
                 description: newGroupDesc.trim(),
-                created_by: user.user_id
+                created_by: userId
             });
             setShowCreateModal(false);
             setNewGroupName('');

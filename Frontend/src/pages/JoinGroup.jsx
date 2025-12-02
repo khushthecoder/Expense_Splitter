@@ -11,7 +11,12 @@ export default function JoinGroup() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user, setUser } = useStore();
+
+  // Use selective selectors to prevent unnecessary re-renders
+  const user = useStore((state) => state.user);
+  const setUser = useStore((state) => state.setUser);
+  const userId = useStore((state) => state.user?.user_id);
+
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("loading"); // loading, success, error, needs-auth
   const [message, setMessage] = useState("");
@@ -21,7 +26,7 @@ export default function JoinGroup() {
 
   useEffect(() => {
     handleJoinGroup();
-  }, [id, user]);
+  }, [id, userId]);
 
   const handleJoinGroup = async () => {
     try {
@@ -37,7 +42,7 @@ export default function JoinGroup() {
       // Call the join group API
       const response = await axios.post(`${API_URL}/groups/${id}/join`, {
         email: email || user.email,
-        user_id: user.user_id,
+        user_id: userId,
       });
 
       if (response.data.success) {
@@ -61,7 +66,7 @@ export default function JoinGroup() {
       } else {
         setMessage(
           error.response?.data?.error ||
-            "Failed to join group. Please try again."
+          "Failed to join group. Please try again."
         );
       }
     } finally {
@@ -71,9 +76,8 @@ export default function JoinGroup() {
 
   const handleLogin = () => {
     // Save the invitation link to redirect after login
-    const returnUrl = `/join-group/${id}${
-      email ? `?email=${encodeURIComponent(email)}` : ""
-    }`;
+    const returnUrl = `/join-group/${id}${email ? `?email=${encodeURIComponent(email)}` : ""
+      }`;
     navigate(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
   };
 

@@ -5,7 +5,13 @@ import { useStore } from '../store/useStore';
 export default function ManageGroup() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentGroup, inviteMember, removeMember, balances } = useStore();
+
+  // Use selective selectors to prevent unnecessary re-renders
+  const currentGroup = useStore((state) => state.currentGroup);
+  const inviteMember = useStore((state) => state.inviteMember);
+  const removeMember = useStore((state) => state.removeMember);
+  const balances = useStore((state) => state.balances);
+
   const [newMemberEmail, setNewMemberEmail] = useState('');
 
   if (!currentGroup) {
@@ -53,7 +59,7 @@ export default function ManageGroup() {
             <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
               ⚙️
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Manage Group</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Manage Group</h1>
             <p className="text-gray-500">{currentGroup.name}</p>
           </div>
 
@@ -101,7 +107,7 @@ export default function ManageGroup() {
                       {member.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">{member.name}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{member.name}</p>
                       <p className="text-xs text-gray-400">Member since {new Date().getFullYear()}</p>
                     </div>
                   </div>

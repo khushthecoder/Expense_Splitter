@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useStore } from '../store/useStore';
 import { Card, Button, Input } from '../components/ui';
 import { UserPlus, Trash2, Mail, Search, Users, DollarSign } from 'lucide-react';
@@ -6,7 +6,11 @@ import { friendService } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 export default function Friends() {
-    const { user } = useStore();
+    // Use selective selectors to prevent unnecessary re-renders
+    // Only subscribe to userId, not the entire user object
+    const userId = useStore((state) => state.user?.user_id);
+    const userName = useStore((state) => state.user?.name);
+
     const navigate = useNavigate();
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,31 +20,33 @@ export default function Friends() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    useEffect(() => {
-        if (user) {
-            fetchFriends();
-        }
-    }, [user]);
-
-    const fetchFriends = async () => {
+    // Memoize fetchFriends to prevent recreation on every render
+    const fetchFriends = useCallback(async () => {
+        if (!userId) return;
         try {
             setLoading(true);
-            const res = await friendService.getAll(user.user_id);
+            const res = await friendService.getAll(userId);
             setFriends(res.data);
         } catch (err) {
             console.error("Failed to fetch friends", err);
         } finally {
             setLoading(false);
         }
-    };
+    }, [userId]);
 
-    const handleAddFriend = async (e) => {
+    useEffect(() => {
+        fetchFriends();
+    }, [fetchFriends]);
+
+    // Memoize handlers to prevent recreation
+    const handleAddFriend = useCallback(async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
 
+        if (!userId) return;
         try {
-            await friendService.add(user.user_id, newFriendEmail);
+            await friendService.add(userId, newFriendEmail);
             setSuccess('Friend added successfully!');
             setNewFriendEmail('');
             setShowAddModal(false);
@@ -48,20 +54,21 @@ export default function Friends() {
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to add friend');
         }
-    };
+    }, [userId, newFriendEmail, fetchFriends]);
 
-    const handleRemoveFriend = async (friendId) => {
+    const handleRemoveFriend = useCallback(async (friendId) => {
         if (!window.confirm('Are you sure you want to remove this friend?')) return;
 
+        if (!userId) return;
         try {
-            await friendService.remove(user.user_id, friendId);
+            await friendService.remove(userId, friendId);
             fetchFriends();
         } catch (err) {
             console.error("Failed to remove friend", err);
         }
-    };
+    }, [userId, fetchFriends]);
 
-    const handleInvite = async (e) => {
+    const handleInvite = useCallback(async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
@@ -69,7 +76,7 @@ export default function Friends() {
         try {
             await friendService.invite({
                 recipient_email: newFriendEmail,
-                inviter_name: user.name
+                inviter_name: userName
             });
             setSuccess('Invitation sent successfully!');
             setNewFriendEmail('');
@@ -77,13 +84,17 @@ export default function Friends() {
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to send invitation');
         }
-    };
+    }, [newFriendEmail, userName]);
 
-    const filteredFriends = friends.filter(f => {
-        const friendData = f.user_id === user.user_id ? f.friend : f.user;
-        return friendData.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            friendData.email.toLowerCase().includes(searchTerm.toLowerCase());
-    });
+    // Memoize filtered friends to prevent recalculation on every render
+    const filteredFriends = useMemo(() => {
+        if (!userId) return [];
+        return friends.filter(f => {
+            const friendData = f.user_id === userId ? f.friend : f.user;
+            return friendData.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                friendData.email.toLowerCase().includes(searchTerm.toLowerCase());
+        });
+    }, [friends, searchTerm, userId]);
 
     return (
         <div className="space-y-6">
@@ -129,7 +140,7 @@ export default function Friends() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredFriends.map(friendship => {
-                        const friend = friendship.user_id === user.user_id ? friendship.friend : friendship.user;
+                        const friend = friendship.user_id === userId ? friendship.friend : friendship.user;
                         return (
                             <Card key={friendship.id} className="p-6 flex items-center justify-between group hover:border-primary/50 dark:hover:border-primary/50 transition-all">
                                 <div className="flex items-center gap-4">
